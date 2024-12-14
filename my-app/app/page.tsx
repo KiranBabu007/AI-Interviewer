@@ -9,7 +9,6 @@ export default function HomePage() {
   useEffect(() => {
     setIsLoading(true);
     router.push("/Home");
-    
   }, [router]);
 
   return (
