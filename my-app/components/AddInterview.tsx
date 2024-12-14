@@ -52,16 +52,16 @@ const AddInterview = () => {
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="interview-type">Interview Type</Label>
-              <div className="relative w-60 h-8 bg-white bg">
+              <div className="relative w-60 h-8 rounded-lg bg-white border-black">
                 <div 
-                  className={`absolute top-0 left-0 w-1/2 h-full bg-black transition-all duration-300 ease-in-out 
+                  className={`absolute top-0 left-0 w-1/2 h-full bg-black  transition-all duration-300 ease-in-out 
                     ${interviewType === 'hr' ? 'translate-x-full' : ''}`}
                 />
                 
-                <div className="relative z-10 flex h-full">
+                <div className="relative z-10 flex rounded-lg h-full">
                   <button 
                     onClick={() => setInterviewType('technical')}
-                    className={`w-1/2 border-none flex items-center justify-center gap-2 transition-colors duration-300 
+                    className={`w-1/2  flex items-center justify-center gap-2 transition-colors duration-300 
                       ${interviewType === 'technical' ? 'text-white' : 'text-black'}`}
                   >
                     <Code2 className="w-4 h-4" /> {/* Technical icon */}
@@ -69,7 +69,7 @@ const AddInterview = () => {
                   </button>
                   <button 
                     onClick={() => setInterviewType('hr')}
-                    className={`w-1/2 border-none flex items-center justify-center gap-2 transition-colors duration-300 
+                    className={`w-1/2  flex items-center justify-center gap-2 transition-colors duration-300 
                       ${interviewType === 'hr' ? 'text-white' : 'text-black'}`}
                   >
                     <Users className="w-4 h-4" /> {/* HR icon */}
