@@ -1,11 +1,12 @@
 import { SignIn } from '@clerk/nextjs'
+import Image from 'next/image'
 
 export default function Page() {
   return(
     <section className="bg-white dark:bg-gray-900">
   <div className="lg:grid lg:min-h-screen lg:grid-cols-12">
     <section className="relative flex h-32 items-end bg-gray-900 lg:col-span-5 lg:h-full xl:col-span-6">
-      <img
+      <Image
         alt=""
         src="https://plus.unsplash.com/premium_photo-1683121710572-7723bd2e235d?q=80&w=1632&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&w=870&q=80"
         className="absolute inset-0 h-full w-full object-cover opacity-80"
