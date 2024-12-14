@@ -1,9 +1,8 @@
 "use client";
 import { motion } from "framer-motion";
 import { HeroHighlight, Highlight } from "@/components/ui/hero-highlight"
-type Props = {}
 
-const Landing = (props: Props) => {
+const Landing = () => {
   return (
     <HeroHighlight>
       <motion.h1
