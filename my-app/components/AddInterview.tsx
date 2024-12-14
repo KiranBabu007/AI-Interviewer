@@ -64,7 +64,7 @@ const AddInterview = () => {
                     className={`w-1/2  flex items-center justify-center gap-2 transition-colors duration-300 
                       ${interviewType === 'technical' ? 'text-white' : 'text-black'}`}
                   >
-                    <Code2 className="w-4 h-4" /> {/* Technical icon */}
+                    <Code2 className="w-4 h-4" /> 
                     Technical
                   </button>
                   <button 
@@ -72,7 +72,7 @@ const AddInterview = () => {
                     className={`w-1/2  flex items-center justify-center gap-2 transition-colors duration-300 
                       ${interviewType === 'hr' ? 'text-white' : 'text-black'}`}
                   >
-                    <Users className="w-4 h-4" /> {/* HR icon */}
+                    <Users className="w-4 h-4" /> 
                     HR
                   </button>
                 </div>
