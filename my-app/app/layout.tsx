@@ -1,15 +1,17 @@
-import React from 'react'
-import { ClerkProvider } from '@clerk/nextjs'
+import React from 'react';
+import { ClerkProvider } from '@clerk/nextjs';
+import './globals.css'; // Import your global CSS file
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div>
-       <ClerkProvider>
+    <ClerkProvider>
       <html lang="en">
-        <body>{children}</body>
+        <body>
+          <div>
+            {children}
+          </div>
+        </body>
       </html>
     </ClerkProvider>
-    </div>
-   
-  )
+  );
 }
