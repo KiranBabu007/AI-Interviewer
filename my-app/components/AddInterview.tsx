@@ -19,7 +19,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { PlusCircle, Code2, Users, PlayCircle } from 'lucide-react'
-import { Toggle } from "@/components/ui/toggle"
 
 
 const AddInterview = () => {
@@ -53,7 +52,7 @@ const AddInterview = () => {
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="interview-type">Interview Type</Label>
-              <div className="relative w-60 h-8 bg-white rounded-md border-black ">
+              <div className="relative w-60 h-8 bg-white bg">
                 <div 
                   className={`absolute top-0 left-0 w-1/2 h-full bg-black transition-all duration-300 ease-in-out 
                     ${interviewType === 'hr' ? 'translate-x-full' : ''}`}
