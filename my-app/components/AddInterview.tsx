@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select"
 import { PlusCircle, Code2, Users, PlayCircle } from 'lucide-react'
 import { Toggle } from "@/components/ui/toggle"
+import { useRouter } from "next/navigation"
 
 
 const AddInterview = () => {
@@ -27,11 +28,35 @@ const AddInterview = () => {
   const [interviewType, setInterviewType] = useState("technical");
   const [role, setRole] = useState("");
   const [experience, setExperience] = useState("");
-  
+  const router = useRouter();
 
-  const handleStart = () => {
-    console.log("Starting interview:", { interviewType, role, experience });
-    setOpen(false);
+  const handleStart = async () => {
+    try {
+      const response = await fetch('/api/interviews', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          interviewType,
+          role,
+          experience
+        })
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.error || 'Something went wrong');
+      }
+  
+      setOpen(false);
+      // Assuming you're using Next.js router
+      //router.push(`/dashboard/interview/${data.mockId}`);
+    } catch (error) {
+      console.error('Error creating interview:', error);
+      // Handle error (show toast notification, etc.)
+    }
   };
 
   return (
