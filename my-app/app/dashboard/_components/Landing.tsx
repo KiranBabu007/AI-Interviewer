@@ -19,13 +19,14 @@ const Landing = (props: Props) => {
           duration: 0.5,
           ease: [0.4, 0.0, 0.2, 1],
         }}
-        className="text-2xl px-4 md:text-4xl lg:text-5xl font-bold text-neutral-700 dark:text-white max-w-4xl leading-relaxed lg:leading-snug text-center mx-auto "
+        className="text-2xl px-4 md:text-4xl lg:text-5xl font-bold text-neutral-700 dark:text-white max-w-4xl leading-relaxed lg:leading-snug text-center mx-auto font-serif "
       >
-        With insomnia, nothing&apos;s real. Everything is far away. Everything
-        is a{" "}
-        <Highlight className="text-black dark:text-white">
-          copy, of a copy, of a copy.
-        </Highlight>
+        Ace Your Career with <br />
+        <Highlight className="text-black dark:text-white font-extrabold">
+          AI-Driven
+        </Highlight> Mock Interviews <br />
+        Perfect Your {' '}
+        <span className="text-violet-400 " >Skills</span>{' '}, Impress Every Recruiter
       </motion.h1>
     </HeroHighlight>
   )

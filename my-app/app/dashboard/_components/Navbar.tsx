@@ -9,7 +9,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <nav className="bg-black text-white">
+    <nav className="bg-black text-white ">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
@@ -23,10 +23,10 @@ const Navbar = () => {
               </Link>
             </div>
             <div className="hidden md:block">
-              <div className="ml-10 flex items-baseline space-x-4">
-                <Link href="/" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 hover:text-white">Home</Link>
-                <Link href="/technical-interview" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 hover:text-white">Technical Interview</Link>
-                <Link href="/hr-interview" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 hover:text-white">HR Interview</Link>
+              <div className="ml-10 flex items-baseline space-x-4 font-bold">
+                <Link href="/" className="px-3 py-2 rounded-md text-sm transform transition-transform duration-200 hover:scale-110">Home</Link>
+                <Link href="/technical-interview" className="px-3 py-2 rounded-md text-sm transform transition-transform duration-200 hover:scale-110">Technical Interview</Link>
+                <Link href="/hr-interview" className="px-3 py-2 rounded-md text-sm transform transition-transform duration-200 hover:scale-110">HR Interview</Link>
               </div>
             </div>
           </div>
