@@ -1,8 +1,8 @@
 import localFont from "next/font/local";
 import "./globals.css";
-import { ClerkProvider, SignInButton} from "@clerk/nextjs";
-import { dark } from '@clerk/themes'
-
+import { ClerkProvider, SignInButton } from "@clerk/nextjs";
+import { dark } from '@clerk/themes';
+import { ReactNode } from 'react';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -20,15 +20,15 @@ export const metadata = {
   description: "Meet Your Future, Faster: Our AI Interviewer Transforms Job Screening with Real-Time Insights and Unbiased Precision – Start Your Journey with the Interviewer of Tomorrow!",
 };
 
-export default function RootLayout({ children }) {
+interface RootLayoutProps {
+  children: ReactNode;
+}
+
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <ClerkProvider  appearance={{
-      baseTheme: dark
-    }}
-      >
+    <ClerkProvider appearance={{ baseTheme: dark }}>
       <html>
-        
-          <body>
+        <body>
           {children}
         </body>
       </html>

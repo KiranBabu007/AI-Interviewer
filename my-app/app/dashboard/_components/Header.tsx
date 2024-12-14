@@ -6,7 +6,7 @@ const Header = () => {
   return (
     <div className="flex p-4 items-center justify-between bg-secondary shadow-md font-sans">
         
-      <Image src={'/logo.svg'} width={80} height={80} />
+      <Image src={'/logo.svg'} alt='logo' width={80} height={80} />
       <ul className="flex gap-6">
         <li className=" hover:text-blue-900 hover:font-bold transition-all">Dashboard</li>
         <li className=" hover:text-blue-900 hover:font-bold transition-all">HR Interview</li>
