@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -19,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { PlusCircle } from 'lucide-react'
+import { PlusCircle, Code2, Users, PlayCircle } from 'lucide-react'
 import { Toggle } from "@/components/ui/toggle"
 
 
@@ -63,16 +62,18 @@ const AddInterview = () => {
                 <div className="relative z-10 flex h-full">
                   <button 
                     onClick={() => setInterviewType('technical')}
-                    className={`w-1/2 border-none flex items-center justify-center transition-colors duration-300 
+                    className={`w-1/2 border-none flex items-center justify-center gap-2 transition-colors duration-300 
                       ${interviewType === 'technical' ? 'text-white' : 'text-black'}`}
                   >
+                    <Code2 className="w-4 h-4" /> {/* Technical icon */}
                     Technical
                   </button>
                   <button 
                     onClick={() => setInterviewType('hr')}
-                    className={`w-1/2 border-none flex items-center justify-center transition-colors duration-300 
+                    className={`w-1/2 border-none flex items-center justify-center gap-2 transition-colors duration-300 
                       ${interviewType === 'hr' ? 'text-white' : 'text-black'}`}
                   >
+                    <Users className="w-4 h-4" /> {/* HR icon */}
                     HR
                   </button>
                 </div>
@@ -124,7 +125,13 @@ const AddInterview = () => {
             </div>
           </div>
           <DialogFooter>
-            <button onClick={handleStart} className="btn btn-primary rounded p-2 bg-black text-white">Start Interview</button>
+            <button 
+              onClick={handleStart} 
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors"
+            >
+              <PlayCircle className="w-5 h-5" />
+              Start Interview
+            </button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
