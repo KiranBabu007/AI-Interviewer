@@ -15,6 +15,7 @@ const page = () => {
           </p>
           <div className="pt-8 grid grid-cols-1 z-20 md:grid-cols-3">
         <AIInterview />
+      
       </div>
         </div>
         
