@@ -53,11 +53,10 @@ const AddInterview = () => {
       }
   
       setOpen(false);
-      // Assuming you're using Next.js router
-      //router.push(`/dashboard/interview/${data.mockId}`);
+    
     } catch (error) {
       console.error('Error creating interview:', error);
-      // Handle error (show toast notification, etc.)
+      
     }
   };
 

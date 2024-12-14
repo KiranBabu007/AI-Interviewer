@@ -27,7 +27,7 @@ const page = () => {
         <div className="absolute pointer-events-none inset-0 flex dark:bg-black bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
         
         {/* Left Panel */}
-        <div className="w-1/2 py-8 px-20 justify-start flex flex-col">
+        <div className="w-2/3 py-8 px-20 justify-start flex flex-col">
           <p className="text-2xl sm:text-5xl font-bold relative z-20 bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-500">
             Welcome to AI-Interviewer
           </p>
