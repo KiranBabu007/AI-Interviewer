@@ -7,9 +7,8 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Set loading to true and redirect to /dashboard
     setIsLoading(true);
-    router.push("/dashboard");
+    router.push("/Home");
     
   }, [router]);
 

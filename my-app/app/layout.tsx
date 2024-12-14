@@ -1,6 +1,6 @@
 import localFont from "next/font/local";
 import "./globals.css";
-import { ClerkProvider, SignInButton } from "@clerk/nextjs";
+import { ClerkProvider} from "@clerk/nextjs";
 import { dark } from '@clerk/themes';
 import { ReactNode } from 'react';
 
