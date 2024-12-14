@@ -1,18 +1,17 @@
-"use client"
-import { ClerkProvider} from '@clerk/nextjs'
-import './globals.css'
-import { usePathname } from 'next/navigation'
+import React from 'react';
+import { ClerkProvider } from '@clerk/nextjs';
+import './globals.css'; // Import your global CSS file
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const path=usePathname()
   return (
     <ClerkProvider>
       <html lang="en">
         <body>
-          <main>
-            {children}</main>
+          <div>
+            {children}
+          </div>
         </body>
       </html>
     </ClerkProvider>
-  )
+  );
 }

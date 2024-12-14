@@ -26,7 +26,9 @@ export async function POST(request: Request) {
 
         const result = await chatSession.sendMessage(inputPrompt);
         const MockJsonResp = result.response.text();
+
         const cleanedResponse = MockJsonResp.replace(/```json\n?|\n?```/g, '');
+
 
         if (!result) {
             return Response.json({ error: 'Failed to generate interview questions' }, { status: 500 });
