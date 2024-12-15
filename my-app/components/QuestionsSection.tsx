@@ -16,7 +16,7 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({ mockInterviewQuesti
     }
   };
   return mockInterviewQuestion && (
-    <div className='p-5 border z-10 rounded-lg my-10'>
+    <div className='p-5  z-10 rounded-lg my-10'>
       <div className='grid grid-cols-2 gap-5'>
         {mockInterviewQuestion.map((question, index) => (
           <div key={index}>
@@ -30,7 +30,7 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({ mockInterviewQuesti
         {mockInterviewQuestion[activeQuestionIndex]?.question}
       </h2>
       <Volume2 className="cursor-pointer" onClick={() => textToSpeech(mockInterviewQuestion[activeQuestionIndex]?.question)} />
-      <div className='border rounded-lg p-5 bg-blue-100 mt-20'>
+      <div className='border rounded-lg p-5 opacity-70 bg-gray-100 mt-20'>
         <h2 className='flex gap-2 items-center text-primary'>
           <Lightbulb />
           <strong>Note:</strong>
