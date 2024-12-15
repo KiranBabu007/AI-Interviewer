@@ -67,9 +67,30 @@ const page = () => {
                   activeQuestionIndex={activeQuestionIndex} 
                   interviewData={interviewDetails}
                 />
+                <div className='flex justify-end gap-6'>
+                {activeQuestionIndex > 0 && (
+                    <Button onClick={() => setActiveQuestionIndex(activeQuestionIndex - 1)}>
+                        Previous Question
+                    </Button>
+                )}
+                {activeQuestionIndex !== questions?.length - 1 && (
+                    <Button onClick={() => setActiveQuestionIndex(activeQuestionIndex + 1)}>
+                        Next Question
+                    </Button>
+                )}
+                {activeQuestionIndex === questions?.length - 1 && (
+                    <Link href={`/dashboard/interview/${interviewDetails?.mockId}/feedback`}>
+                        <Button>End Interview</Button>
+                    </Link>
+                )}
+            </div>
               </div>
             </div>
           </div>
+
+
+          
+
         </div>
       </div>
     </div>
