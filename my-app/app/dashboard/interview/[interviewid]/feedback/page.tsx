@@ -23,9 +23,9 @@ const Feedback: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-
-
-
+  useEffect(() => {
+    GetFeedback();
+  }, []);
   const GetFeedback = async () => {
     try {
       setLoading(true);
@@ -48,9 +48,7 @@ const Feedback: React.FC = () => {
     } finally {
       setLoading(false);
     }
-    useEffect(() => {
-    GetFeedback();
-  }, [GetFeedback]);
+    
   };
 
   if (loading) {
@@ -65,7 +63,7 @@ const Feedback: React.FC = () => {
     <BackgroundBeamsWithCollision>
     <div className='p-10 bg-black h-full'>
       <h2 className='text-3xl font-bold text-green-600'>Congratulations!</h2>
-      <h2 className='font-bold text-2xl'>Here is your interview feedback</h2>
+      <h2 className='font-bold text-2xl text-white'>Here is your interview feedback</h2>
       
       {feedbackList.length === 0 ? (
         <h2 className='font-bold text-lg text-green-500'>No interview Feedback</h2>
