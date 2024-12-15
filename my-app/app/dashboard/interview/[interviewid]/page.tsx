@@ -15,28 +15,29 @@ const Page = () => {
   const interviewId = useParams().interviewid;
 
   useEffect(() => {
-    const GetInterviewDetails = async () => {
-      try {
-        const response = await fetch(`/api/interviews/${interviewId}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-  
-        if (!response.ok) {
-          throw new Error('Failed to fetch interview details');
-        }
-  
-        const data = await response.json();
-        setInterviewDetails(data.interviewData);
-        setQuestions(data.mockInterviewQuestions);
-      } catch (error: unknown) {
-        console.error('Error fetching interview details:', error);
-      }
-    }
     GetInterviewDetails();
-  },[interviewId]);
+  },[]);
+
+  const GetInterviewDetails = async () => {
+    try {
+      const response = await fetch(`/api/interviews/${interviewId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch interview details');
+      }
+
+      const data = await response.json();
+      setInterviewDetails(data.interviewData);
+      setQuestions(data.mockInterviewQuestions);
+    } catch (error: unknown) {
+      console.error('Error fetching interview details:', error);
+    }
+  }
 
   return (
     <div className="relative h-screen w-full bg-neutral-950 flex flex-col overflow-hidden">

@@ -7,6 +7,7 @@ interface QuestionsSectionProps {
 }
 
 const QuestionsSection: React.FC<QuestionsSectionProps> = ({ mockInterviewQuestion, activeQuestionIndex }) => {
+  
   const textToSpeech = (text: string) => {
     if ('speechSynthesis' in window) {
       const speech = new SpeechSynthesisUtterance(text);
