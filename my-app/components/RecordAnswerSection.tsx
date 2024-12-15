@@ -5,7 +5,6 @@ import React, { useEffect, useState } from 'react';
 import Webcam from 'react-webcam';
 import useSpeechToText from 'react-hook-speech-to-text';
 import { Mic, StopCircle } from 'lucide-react';
-
 import { useUser } from '@clerk/nextjs';
 
 interface RecordAnswerSectionProps {
@@ -19,8 +18,6 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({ mockInterview
   const [loading, setLoading] = useState<boolean>(false);
   const { user } = useUser();
   const {
-    error,
-    interimResult,
     isRecording,
     results,
     startSpeechToText,
@@ -71,7 +68,7 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({ mockInterview
       });
 
       const result = await response.json();
-
+      console.log('result:', result);
       if (response.ok) {
         
         setUserAnswer('');
@@ -89,10 +86,11 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({ mockInterview
 
   return (
     <div className='flex flex-col justify-center items-center '>
-      <div className='flex flex-col justify-center items-center p-5 rounded-lg bg-black mt-20'>
+      <div className='flex flex-col justify-center items-center rounded-lg bg-black mt-20'>
         <Image src={'/webcam.png'} width={200} height={200} className='absolute' alt='webcam image' />
         <Webcam mirrored={true} style={{ height: 300, width: '100%', zIndex: 10 }} />
       </div>
+      
       <Button disabled={loading} variant="outline" className="my-10" onClick={StartStopRecording}>
         {isRecording ? (
           <h2 className="text-red-600 items-center animate-pulse flex gap-2">

@@ -7,7 +7,6 @@ interface QuestionsSectionProps {
 }
 
 const QuestionsSection: React.FC<QuestionsSectionProps> = ({ mockInterviewQuestion, activeQuestionIndex }) => {
-
   const textToSpeech = (text: string) => {
     if ('speechSynthesis' in window) {
       const speech = new SpeechSynthesisUtterance(text);
@@ -16,23 +15,22 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({ mockInterviewQuesti
       alert("Sorry, your browser does not support text to speech");
     }
   };
-
   return mockInterviewQuestion && (
-    <div className='p-5 border rounded-lg my-10'>
+    <div className='p-5  z-10 rounded-lg my-10'>
       <div className='grid grid-cols-2 gap-5'>
         {mockInterviewQuestion.map((question, index) => (
           <div key={index}>
-            <h2 className={`p-2 bg-secondary text-white rounded-full text-xs md:text-sm text-center cursor-pointer ${activeQuestionIndex === index && 'bg-blue-600 text-black'}`}>
+            <h2 className={`p-2 bg-secondary text-black rounded-full text-xs md:text-sm text-center cursor-pointer ${activeQuestionIndex === index && 'bg-blue-600 text-black'}`}>
               Question #{index + 1}
             </h2>
           </div>
         ))}
       </div>
-      <h2 className='my-5 text-md md:text-lg'>
+      <h2 className='my-5 text-md md:text-lg text-white'>
         {mockInterviewQuestion[activeQuestionIndex]?.question}
       </h2>
       <Volume2 className="cursor-pointer" onClick={() => textToSpeech(mockInterviewQuestion[activeQuestionIndex]?.question)} />
-      <div className='border rounded-lg p-5 bg-blue-100 mt-20'>
+      <div className='border rounded-lg p-5 opacity-70 bg-gray-100 mt-20'>
         <h2 className='flex gap-2 items-center text-primary'>
           <Lightbulb />
           <strong>Note:</strong>
