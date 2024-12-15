@@ -24,9 +24,7 @@ const Feedback: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    GetFeedback();
-  }, []);
+
 
   const GetFeedback = async () => {
     try {
@@ -50,6 +48,9 @@ const Feedback: React.FC = () => {
     } finally {
       setLoading(false);
     }
+    useEffect(() => {
+    GetFeedback();
+  }, [GetFeedback]);
   };
 
   if (loading) {
