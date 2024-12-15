@@ -11,48 +11,49 @@ const page = () => {
 
   const [interviewDetails, setInterviewDetails]= React.useState<any>(null);
   const [questions, setQuestions]= React.useState<any>(null);
-  const [activeQuestionIndex, setActiveQuestionIndex]= React.useState<number>(1);
-
-  useEffect(() => {
-    GetInterviewDetails();
-  },[]);
+  const [activeQuestionIndex, setActiveQuestionIndex]= React.useState<number>(0);
   const interviewId = useParams().interviewid;
+  useEffect(() => {
+    const GetInterviewDetails = async () => {
+      try {
+        
+        const response = await fetch(`/api/interviews/${interviewId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
   
-  const GetInterviewDetails = async () => {
-    try {
-      
-      const response = await fetch(`/api/interviews/${interviewId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch interview details');
+        if (!response.ok) {
+          throw new Error('Failed to fetch interview details');
+        }
+  
+        const data = await response.json();
+        console.log('Data:', data);
+        setInterviewDetails(data.interviewData);
+        setQuestions(data.mockInterviewQuestions);
+      } catch (error: any) {
+        console.error('Error fetching interview details:', error);
+        
+      } finally {
+        console.log('Interview Details:', interviewDetails);
+        console.log('Questions:', questions);
       }
-
-      const data = await response.json();
-      console.log('Data:', data);
-      setInterviewDetails(data.interviewData);
-      setQuestions(data.mockInterviewQuestions);
-    } catch (error: any) {
-      console.error('Error fetching interview details:', error);
-      
-    } finally {
-      console.log('Interview Details:', interviewDetails);
-      console.log('Questions:', questions);
     }
-  }
+    GetInterviewDetails();
+  },[interviewId]);
+
+  
+ 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black to-gray-900">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-4">
         <div className="relative">
           {/* Background grid pattern */}
           <div className="absolute inset-0 bg-grid-white/[0.02] bg-grid" />
           
           {/* Content with backdrop blur */}
-          <div className="relative z-10">
+          <div className="relative ">
             <div className='grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12'>
               <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-6 border border-white/5 shadow-xl">
                 <QuestionsSection

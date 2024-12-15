@@ -30,10 +30,7 @@ const AddInterview = () => {
   const router = useRouter();
 
   const handleStart = async () => {
-    if (!role || !experience) {
-      alert("Please select both role and experience");
-      return;
-    }
+    
 
     setLoading(true);
     try {
