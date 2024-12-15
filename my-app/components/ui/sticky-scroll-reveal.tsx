@@ -19,8 +19,8 @@ export const StickyScroll = ({
   const ref = useRef<any>(null);
   const { scrollYProgress } = useScroll({
     // uncomment line 22 and comment line 23 if you DONT want the overflow container and want to have it change on the entire page scroll
-    // target: ref
-    container: ref,
+    //  target: ref,
+     container: ref,
     offset: ["start start", "end start"],
   });
   const cardLength = content.length;
@@ -42,8 +42,10 @@ export const StickyScroll = ({
 
   const backgroundColors = [
     "var(--black)",
+    "var(--blue-900)",
     "var(--slate-900)",
     "var(--neutral-900)",
+    
   ];
   const linearGradients = [
     "linear-gradient(to bottom right, var(--cyan-500), var(--emerald-500))",
@@ -68,7 +70,7 @@ export const StickyScroll = ({
       ref={ref}
     >
       <div className="div relative flex items-start px-2 py-2">
-        <div className="max-w-2xl">
+        <div className="max-w-2xl z-20">
           {content.map((item, index) => (
             <div key={item.title + index} className="my-20">
               <motion.h2
