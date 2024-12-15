@@ -93,7 +93,7 @@ const config: Config = {
 		  },
 		  { values: flattenColorPalette(theme("backgroundColor")), type: "color" }
 		);
-	  },
+	  },require('tailwind-scrollbar-hide')
   ],
 };
 function addVariablesForColors({ addBase, theme }: any) {
