@@ -34,7 +34,7 @@ export async function GET(request: Request, { params }: { params: { interviewid:
         console.error('Error fetching feedback:', error);
         return NextResponse.json({ 
             error: 'Internal server error', 
-            details: error.message 
+            message: 'Failed to fetch'
         }, { status: 500 });
     }
 }

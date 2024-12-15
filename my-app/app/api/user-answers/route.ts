@@ -69,7 +69,7 @@ export async function POST(request: Request) {
     console.error('Error processing interview answer:', error);
     return NextResponse.json({ 
       error: 'Failed to process interview answer',
-      details: error.message 
+      details: 'Internal server error'
     }, { status: 500 });
   }
 }
