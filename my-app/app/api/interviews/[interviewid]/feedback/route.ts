@@ -30,7 +30,7 @@ export async function GET(request: Request, { params }: { params: { interviewid:
             feedbackList: result
         });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error fetching feedback:', error);
         return NextResponse.json({ 
             error: 'Internal server error', 

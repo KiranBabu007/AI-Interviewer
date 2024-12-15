@@ -10,7 +10,7 @@ import { useUser } from '@clerk/nextjs';
 interface RecordAnswerSectionProps {
   mockInterviewQuestion: { question: string }[];
   activeQuestionIndex: number;
-  interviewData: any;
+  interviewData: string[];
 }
 
 const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({ mockInterviewQuestion, activeQuestionIndex, interviewData }) => {

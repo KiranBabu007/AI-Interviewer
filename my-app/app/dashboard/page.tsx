@@ -3,7 +3,7 @@ import AIInterview from "@/components/AddInterview";
 import React, { useState } from "react";
 import { Mic, Video, CheckCircle } from 'lucide-react';
 
-const page = () => {
+const Page = () => {
   const [audioPermission, setAudioPermission] = useState(false);
   const [videoPermission, setVideoPermission] = useState(false);
 
@@ -86,7 +86,7 @@ const page = () => {
           <div className="space-y-4 bg-white p-8 rounded-lg bg-opacity-20">
             <h3 className="text-xl mb-4">Interview Guidelines</h3>
             <ul className="list-disc list-inside space-y-2 text-gray-300">
-              <li>Ensure you're in a quiet environment</li>
+              <li>Ensure you`&apos;`re in a quiet environment</li>
               <li>Position yourself in front of the camera</li>
               <li>Speak clearly and maintain eye contact</li>
               <li>Have your resume ready for reference</li>
@@ -100,4 +100,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;
