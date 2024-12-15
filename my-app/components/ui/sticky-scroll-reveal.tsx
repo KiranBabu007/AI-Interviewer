@@ -11,7 +11,7 @@ export const StickyScroll = ({
   content: {
     title: string;
     description: string;
-    content?: React.ReactNode | any;
+    content?: React.ReactNode;
   }[];
   contentClassName?: string;
 }) => {
@@ -21,7 +21,7 @@ export const StickyScroll = ({
     // uncomment line 22 and comment line 23 if you DONT want the overflow container and want to have it change on the entire page scroll
     //  target: ref,
      container: ref,
-    offset: ["start start", "end start"],
+    offset: ["start start", "end end"],
   });
   const cardLength = content.length;
 
@@ -72,7 +72,7 @@ export const StickyScroll = ({
       <div className="div relative flex items-start px-2 py-2">
         <div className="max-w-2xl z-20">
           {content.map((item, index) => (
-            <div key={item.title + index} className="my-20">
+            <div key={item.title + index+1} className="my-20">
               <motion.h2
                 initial={{
                   opacity: 0,
