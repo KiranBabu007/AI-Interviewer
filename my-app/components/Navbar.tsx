@@ -1,12 +1,22 @@
-'use client'
+'use client';
 
-import Link from 'next/link'
-import { useState } from 'react'
-import { UserButton } from '@clerk/nextjs'
-import { Menu, X } from 'lucide-react'
+import Link from 'next/link';
+import { useState } from 'react';
+import { usePathname } from 'next/navigation'; // Import usePathname for current route
+import { UserButton } from '@clerk/nextjs';
+import { Menu, X } from 'lucide-react';
 
-const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false)
+const Navbar = ({
+  onAboutClick,
+  onHowItWorksClick,
+}: {
+  onAboutClick: () => void;
+  onHowItWorksClick: () => void;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname(); // Get the current pathname
+
+  const isHomePage = pathname === '/Home'; // Check if the current route is /Home
 
   return (
     <nav className="bg-black text-white">
@@ -15,24 +25,67 @@ const Navbar = () => {
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <Link href="/">
-                <svg className="h-8 w-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <svg
+                  className="h-8 w-8"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 2L2 7L12 12L22 7L12 2Z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M2 17L12 22L22 17"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M2 12L12 17L22 12"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               </Link>
             </div>
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-4 font-bold">
-                <Link href="/" className="px-3 py-2 rounded-md text-sm transform transition-transform duration-200 hover:scale-110">Home</Link>
-                <Link href="/About" className="px-3 py-2 rounded-md text-sm transform transition-transform duration-200 hover:scale-110">About Us</Link>
-                <Link href="/HowItWorks" className="px-3 py-2 rounded-md text-sm transform transition-transform duration-200 hover:scale-110">How It Works</Link>
+                <Link
+                  href="/"
+                  className="px-3 py-2 rounded-md text-sm transform transition-transform duration-200 hover:scale-110"
+                >
+                  Home
+                </Link>
+                {/* Conditionally show About Us and How It Works */}
+                {isHomePage && (
+                  <>
+                    <button
+                      onClick={onAboutClick}
+                      className="px-3 py-2 rounded-md text-sm transform transition-transform duration-200 hover:scale-110"
+                    >
+                      About Us
+                    </button>
+                    <button
+                      onClick={onHowItWorksClick}
+                      className="px-3 py-2 rounded-md text-sm transform transition-transform duration-200 hover:scale-110"
+                    >
+                      How It Works
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>
           <div className="hidden md:block">
             <div className="ml-4 flex items-center md:ml-6">
-              <UserButton  />
+              <UserButton />
             </div>
           </div>
           <div className="-mr-2 flex md:hidden">
@@ -50,15 +103,34 @@ const Navbar = () => {
       {isOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <Link href="/" className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700">Home</Link>
-            <Link href="/about-us" className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700">About Us</Link>
-            <Link href="/how-it-works" className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700">How It Works</Link>
+            <Link
+              href="/"
+              className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700"
+            >
+              Home
+            </Link>
+            {/* Conditionally show About Us and How It Works */}
+            {isHomePage && (
+              <>
+                <button
+                  onClick={onAboutClick}
+                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700"
+                >
+                  About Us
+                </button>
+                <button
+                  onClick={onHowItWorksClick}
+                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700"
+                >
+                  How It Works
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
     </nav>
-  )
-}
+  );
+};
 
-export default Navbar
-
+export default Navbar;
