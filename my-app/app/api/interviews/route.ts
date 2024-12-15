@@ -19,9 +19,9 @@ export async function POST(request: Request) {
         // Generate AI response based on interview type
         let inputPrompt = '';
         if (interviewType === 'technical') {
-            inputPrompt = `Role: ${role}, Experience Level: ${experience}. Generate 2 technical interview questions appropriate for this role and experience level, along with detailed answers. Provide the response in JSON format as an array of objects with 'question' and 'answer' fields: [{'question':'...','answer':'...'}]`;
+            inputPrompt = `Role: ${role}, Experience Level: ${experience}. Generate 4 technical interview questions appropriate for this role and experience level, along with detailed answers.Answers should be one paragraph. Provide the response in JSON format as an array of objects with 'question' and 'answer' fields: [{'question':'...','answer':'...'}]`;
         } else {
-            inputPrompt = `Experience Level: ${experience}. Generate 2 HR interview questions appropriate for this experience level, along with detailed sample answers. Provide the response in JSON format as an array of objects with 'question' and 'answer' fields: [{'question':'...','answer':'...'}]`;
+            inputPrompt = `Experience Level: ${experience}. Generate 4 HR interview questions appropriate for this experience level, along with detailed sample answers. Provide the response in JSON format as an array of objects with 'question' and 'answer' fields: [{'question':'...','answer':'...'}]`;
         }
 
         const result = await chatSession.sendMessage(inputPrompt);
