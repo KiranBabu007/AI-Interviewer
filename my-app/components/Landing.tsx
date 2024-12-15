@@ -34,7 +34,6 @@ const Landing = () => {
             <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-950 px-3 py-1 text-sm font-bold text-white backdrop-blur-3xl">
               Get Started <ArrowRight className="ml-2 h-4 w-4" />
             </span>
-            
           </button>
           </Link>
         </div>

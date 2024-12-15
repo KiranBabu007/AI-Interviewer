@@ -55,11 +55,9 @@ const page = () => {
                     activeQuestionIndex={activeQuestionIndex} 
                     interviewData={interviewDetails}
                 />
-
-
       </div>
 
-      {/* <div className='flex justify-end gap-6'>
+      <div className='flex justify-end gap-6'>
                 {activeQuestionIndex > 0 && (
                     <Button onClick={() => setActiveQuestionIndex(activeQuestionIndex - 1)}>
                         Previous Question
@@ -75,7 +73,7 @@ const page = () => {
                         <Button>End Interview</Button>
                     </Link>
                 )}
-            </div> */}
+            </div>
     </div>
   )
 }
