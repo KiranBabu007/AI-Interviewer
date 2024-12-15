@@ -9,15 +9,28 @@ const page = () => {
 
   const requestPermissions = async (type: 'audio' | 'video') => {
     try {
+      if ((type === 'audio' && audioPermission) || (type === 'video' && videoPermission)) {
+        // Deactivate permission
+        if (type === 'audio') setAudioPermission(false);
+        if (type === 'video') setVideoPermission(false);
+        return;
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: type === 'audio',
         video: type === 'video'
       });
+
+      // Set permission state
       if (type === 'audio') setAudioPermission(true);
       if (type === 'video') setVideoPermission(true);
+
+      // Stop tracks after getting permission
       stream.getTracks().forEach(track => track.stop());
     } catch (err) {
-      console.error(`${type} permission denied:`, err);
+      console.error(`${type} permission error:`, err);
+      if (type === 'audio') setAudioPermission(false);
+      if (type === 'video') setVideoPermission(false);
     }
   };
 
@@ -49,7 +62,7 @@ const page = () => {
             <div className="space-y-4">
               <button
                 onClick={() => requestPermissions('audio')}
-                className={`flex items-center space-x-2 p-2 text-black rounded ${
+                className={`flex items-center text-black space-x-2 p-2 rounded ${
                   audioPermission ? 'bg-green-400' : 'bg-white hover:bg-gray-100'
                 }`}
               >
