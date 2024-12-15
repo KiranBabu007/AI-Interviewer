@@ -6,55 +6,59 @@ import Image from "next/image";
 
 const content = [
   {
-    title: "Collaborative Editing",
-    description:
-      "Work together in real time with your team, clients, and stakeholders. Collaborate on documents, share ideas, and make decisions quickly. With our platform, you can streamline your workflow and increase productivity.",
+    title: "Choose Your Interview Type",
+    description: 
+      "Start by selecting between Technical or HR interview modes. For technical interviews, specify your role (e.g., Developer, Designer) and experience level. HR interviews focus on soft skills and general competencies.",
     content: (
-      <div className="h-full w-full bg-[linear-gradient(to_bottom_right,var(--cyan-500),var(--emerald-500))] flex items-center justify-center text-white">
-        Collaborative Editing
+      <div className="h-full w-full bg-[linear-gradient(to_bottom_right,var(--purple-500),var(--blue-500))] flex items-center justify-center text-white">
+        Interview Selection
       </div>
     ),
   },
   {
-    title: "Real time changes",
+    title: "Setup Your Environment",
     description:
-      "See changes as they happen. With our platform, you can track every modification in real time. No more confusion about the latest version of your project. Say goodbye to the chaos of version control and embrace the simplicity of real-time updates.",
+      "Enable your camera and microphone permissions. These are essential for a realistic interview experience, allowing our AI to analyze both your verbal responses and non-verbal cues for comprehensive feedback.",
     content: (
-      <div className="h-full w-full  flex items-center justify-center text-white">
-        <Image
-          src="/linear.webp"
-          width={300}
-          height={300}
-          className="h-full w-full object-cover"
-          alt="linear board demo"
-        />
+      <div className="h-full w-full bg-[linear-gradient(to_bottom_right,var(--blue-500),var(--cyan-500))] flex items-center justify-center text-white">
+        Device Setup
       </div>
     ),
   },
   {
-    title: "Version control",
+    title: "Interactive AI Interview",
     description:
-      "Experience real-time updates and never stress about version control again. Our platform ensures that you're always working on the most recent version of your project, eliminating the need for constant manual updates. Stay in the loop, keep your team aligned, and maintain the flow of your work without any interruptions.",
+      "Engage in a dynamic conversation with our AI interviewer. Answer questions naturally through speech, just like in a real interview. The AI adapts its questions based on your responses, creating a personalized interview experience.",
+    content: (
+      <div className="h-full w-full bg-[linear-gradient(to_bottom_right,var(--emerald-500),var(--green-500))] flex items-center justify-center text-white">
+        Live Interview
+      </div>
+    ),
+  },
+  {
+    title: "Real-time Recording & Analysis",
+    description:
+      "Your responses are recorded and analyzed in real-time. Our AI evaluates your communication skills, technical knowledge, and professional competencies throughout the interview session.",
     content: (
       <div className="h-full w-full bg-[linear-gradient(to_bottom_right,var(--orange-500),var(--yellow-500))] flex items-center justify-center text-white">
-        Version control
+        Performance Analysis
       </div>
     ),
   },
   {
-    title: "Running out of content",
+    title: "Comprehensive Performance Report",
     description:
-      "Experience real-time updates and never stress about version control again. Our platform ensures that you're always working on the most recent version of your project, eliminating the need for constant manual updates. Stay in the loop, keep your team aligned, and maintain the flow of your work without any interruptions.",
+      "Receive a detailed evaluation report immediately after your interview. Get insights on your strengths, areas for improvement, and specific recommendations to enhance your interview performance.",
     content: (
-      <div className="h-full w-full bg-[linear-gradient(to_bottom_right,var(--cyan-500),var(--emerald-500))] flex items-center justify-center text-white">
-        Running out of content
+      <div className="h-full w-full bg-[linear-gradient(to_bottom_right,var(--red-500),var(--pink-500))] flex items-center justify-center text-white">
+        Detailed Report
       </div>
     ),
-  },
+  }
 ];
 export default function HowItWorks() {
   return (
-    <div >
+    <div className="pt-10 bg-black">
       <StickyScroll content={content} />
     </div>
   );
