@@ -22,7 +22,7 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({ mockInterviewQuesti
       <div className='grid grid-cols-2 gap-5'>
         {mockInterviewQuestion.map((question, index) => (
           <div key={index}>
-            <h2 className={`p-2 bg-secondary rounded-full text-xs md:text-sm text-center cursor-pointer ${activeQuestionIndex === index && 'bg-blue-600 text-black'}`}>
+            <h2 className={`p-2 bg-secondary text-white rounded-full text-xs md:text-sm text-center cursor-pointer ${activeQuestionIndex === index && 'bg-blue-600 text-black'}`}>
               Question #{index + 1}
             </h2>
           </div>

@@ -88,7 +88,7 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({ mockInterview
   };
 
   return (
-    <div className='flex flex-col justify-center items-center'>
+    <div className='flex flex-col justify-center items-center '>
       <div className='flex flex-col justify-center items-center p-5 rounded-lg bg-black mt-20'>
         <Image src={'/webcam.png'} width={200} height={200} className='absolute' alt='webcam image' />
         <Webcam mirrored={true} style={{ height: 300, width: '100%', zIndex: 10 }} />

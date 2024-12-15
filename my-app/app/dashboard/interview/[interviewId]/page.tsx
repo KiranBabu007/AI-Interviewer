@@ -2,6 +2,8 @@
 
 import QuestionsSection from '@/components/QuestionsSection';
 import RecordAnswerSection from '@/components/RecordAnswerSection';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import React, { useEffect } from 'react'
 
@@ -43,37 +45,33 @@ const page = () => {
     }
   }
   return (
-    <div>
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-10'>
+    <div className="min-h-screen bg-gradient-to-b from-black to-gray-900">
+      <div className="container mx-auto px-4 py-8">
+        <div className="relative">
+          {/* Background grid pattern */}
+          <div className="absolute inset-0 bg-grid-white/[0.02] bg-grid" />
+          
+          {/* Content with backdrop blur */}
+          <div className="relative z-10">
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12'>
+              <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-6 border border-white/5 shadow-xl">
                 <QuestionsSection
-                    mockInterviewQuestion={questions} 
-                    activeQuestionIndex={activeQuestionIndex}
+                  mockInterviewQuestion={questions} 
+                  activeQuestionIndex={activeQuestionIndex}
                 />
+              </div>
 
+              <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-6 border border-white/5 shadow-xl">
                 <RecordAnswerSection
-                    mockInterviewQuestion={questions} 
-                    activeQuestionIndex={activeQuestionIndex} 
-                    interviewData={interviewDetails}
+                  mockInterviewQuestion={questions} 
+                  activeQuestionIndex={activeQuestionIndex} 
+                  interviewData={interviewDetails}
                 />
-      </div>
-
-      <div className='flex justify-end gap-6'>
-                {activeQuestionIndex > 0 && (
-                    <Button onClick={() => setActiveQuestionIndex(activeQuestionIndex - 1)}>
-                        Previous Question
-                    </Button>
-                )}
-                {activeQuestionIndex !== mockInterviewQuestion?.length - 1 && (
-                    <Button onClick={() => setActiveQuestionIndex(activeQuestionIndex + 1)}>
-                        Next Question
-                    </Button>
-                )}
-                {activeQuestionIndex === mockInterviewQuestion?.length - 1 && (
-                    <Link href={`/dashboard/interview/${interviewData?.mockId}/feedback`}>
-                        <Button>End Interview</Button>
-                    </Link>
-                )}
+              </div>
             </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
