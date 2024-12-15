@@ -31,7 +31,7 @@ export async function GET(request: Request, { params }: { params: { interviewid:
             console.error('Error parsing interview questions:', parseError);
             return new Response(JSON.stringify({ error: 'Invalid interview data format' }), { status: 500 });
         }
-
+        console.log('Mock Interview Questions:', mockInterviewQuestions);
         return new Response(JSON.stringify({
             interviewData: interviewData,
             mockInterviewQuestions: mockInterviewQuestions

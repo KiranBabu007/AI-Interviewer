@@ -11,7 +11,7 @@ const page = () => {
 
   const [interviewDetails, setInterviewDetails]= React.useState<any>(null);
   const [questions, setQuestions]= React.useState<any>(null);
-  const [activeQuestionIndex, setActiveQuestionIndex]= React.useState<number>(1);
+  const [activeQuestionIndex, setActiveQuestionIndex]= React.useState<number>(0);
 
   useEffect(() => {
     GetInterviewDetails();
@@ -20,7 +20,6 @@ const page = () => {
   
   const GetInterviewDetails = async () => {
     try {
-      
       const response = await fetch(`/api/interviews/${interviewId}`, {
         method: 'GET',
         headers: {
