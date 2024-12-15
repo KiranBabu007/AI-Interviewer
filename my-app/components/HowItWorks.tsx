@@ -11,7 +11,7 @@ const content = [
       "Start by selecting between Technical or HR interview modes. For technical interviews, specify your role (e.g., Developer, Designer) and experience level. HR interviews focus on soft skills and general competencies.",
     content: (
       <div className="h-full w-full bg-[linear-gradient(to_bottom_right,var(--purple-500),var(--blue-500))] flex items-center justify-center text-white">
-        <Image src="/intselect.png" width={400} height={400} alt="" />
+        <Image src="/intselect.png" width={500} height={400} alt="" />
       </div>
     ),
   },
