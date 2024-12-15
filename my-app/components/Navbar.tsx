@@ -25,8 +25,8 @@ const Navbar = () => {
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-4 font-bold">
                 <Link href="/" className="px-3 py-2 rounded-md text-sm transform transition-transform duration-200 hover:scale-110">Home</Link>
-                <Link href="/about-us" className="px-3 py-2 rounded-md text-sm transform transition-transform duration-200 hover:scale-110">About Us</Link>
-                <Link href="/how-it-works" className="px-3 py-2 rounded-md text-sm transform transition-transform duration-200 hover:scale-110">How It Works</Link>
+                <Link href="/About" className="px-3 py-2 rounded-md text-sm transform transition-transform duration-200 hover:scale-110">About Us</Link>
+                <Link href="/HowItWorks" className="px-3 py-2 rounded-md text-sm transform transition-transform duration-200 hover:scale-110">How It Works</Link>
               </div>
             </div>
           </div>
