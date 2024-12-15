@@ -20,9 +20,7 @@ import {
 } from "@/components/ui/select"
 import { PlusCircle, Code2, Users, PlayCircle } from 'lucide-react'
 
-
 import { useRouter } from "next/navigation"
-
 
 
 const AddInterview = () => {
@@ -53,7 +51,7 @@ const AddInterview = () => {
       }
   
       setOpen(false);
-    
+      router.push('/dashboard/interview/' + data.mockId);
     } catch (error) {
       console.error('Error creating interview:', error);
       
