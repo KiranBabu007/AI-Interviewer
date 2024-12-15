@@ -5,7 +5,6 @@ import React, { useEffect, useState } from 'react';
 import Webcam from 'react-webcam';
 import useSpeechToText from 'react-hook-speech-to-text';
 import { Mic, StopCircle } from 'lucide-react';
-
 import { useUser } from '@clerk/nextjs';
 
 interface RecordAnswerSectionProps {
@@ -71,7 +70,7 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({ mockInterview
       });
 
       const result = await response.json();
-
+      console.log('result:', result);
       if (response.ok) {
         
         setUserAnswer('');
