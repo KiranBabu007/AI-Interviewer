@@ -11,7 +11,7 @@ const content = [
       "Start by selecting between Technical or HR interview modes. For technical interviews, specify your role (e.g., Developer, Designer) and experience level. HR interviews focus on soft skills and general competencies.",
     content: (
       <div className="h-full w-full bg-[linear-gradient(to_bottom_right,var(--purple-500),var(--blue-500))] flex items-center justify-center text-white">
-        Interview Selection
+        <Image src="/intselect.png" width={400} height={400} alt="" />
       </div>
     ),
   },
@@ -21,7 +21,7 @@ const content = [
       "Enable your camera and microphone permissions. These are essential for a realistic interview experience, allowing our AI to analyze both your verbal responses and non-verbal cues for comprehensive feedback.",
     content: (
       <div className="h-full w-full bg-[linear-gradient(to_bottom_right,var(--blue-500),var(--cyan-500))] flex items-center justify-center text-white">
-        Device Setup
+        <Image src="/intselect.png" width={400} height={400} alt=""/>
       </div>
     ),
   },
@@ -31,7 +31,7 @@ const content = [
       "Engage in a dynamic conversation with our AI interviewer. Answer questions naturally through speech, just like in a real interview. The AI adapts its questions based on your responses, creating a personalized interview experience.",
     content: (
       <div className="h-full w-full bg-[linear-gradient(to_bottom_right,var(--emerald-500),var(--green-500))] flex items-center justify-center text-white">
-        Live Interview
+        <Image src="/intselect.png" width={400} height={400} alt=""/>
       </div>
     ),
   },
@@ -41,7 +41,7 @@ const content = [
       "Your responses are recorded and analyzed in real-time. Our AI evaluates your communication skills, technical knowledge, and professional competencies throughout the interview session.",
     content: (
       <div className="h-full w-full bg-[linear-gradient(to_bottom_right,var(--orange-500),var(--yellow-500))] flex items-center justify-center text-white">
-        Performance Analysis
+        <Image src="/intselect.png" width={400} height={400} alt=""/>
       </div>
     ),
   },
@@ -51,7 +51,7 @@ const content = [
       "Receive a detailed evaluation report immediately after your interview. Get insights on your strengths, areas for improvement, and specific recommendations to enhance your interview performance.",
     content: (
       <div className="h-full w-full bg-[linear-gradient(to_bottom_right,var(--red-500),var(--pink-500))] flex items-center justify-center text-white">
-        Detailed Report
+        <Image src="/intselect.png" width={400} height={400} alt=""/>
       </div>
     ),
   }
