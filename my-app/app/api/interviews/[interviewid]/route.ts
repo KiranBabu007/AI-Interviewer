@@ -1,16 +1,15 @@
 import { db } from '@/utils/db';
 import { MockInterview } from '@/utils/schema';
 import { eq } from 'drizzle-orm';
-import { auth } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 
 export async function GET(request: Request, { params }: { params: { interviewid: string } }) {
     try {
         const { userId } = await auth();
-
-        if (!userId) {
-            return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+        const user = await currentUser();
+        if (!userId || !user?.emailAddresses?.[0]?.emailAddress) {
+            return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
-
         // Fetch the specific interview by its mockId
         const result = await db.select()
             .from(MockInterview)
@@ -24,6 +23,7 @@ export async function GET(request: Request, { params }: { params: { interviewid:
         // Parse the JSON mock response
         const interviewData = result[0];
         let mockInterviewQuestions;
+        console.log('Interview Data:', interviewData);
         
         try {
             mockInterviewQuestions = JSON.parse(interviewData.jsonMockResp);
