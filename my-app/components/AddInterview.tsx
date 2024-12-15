@@ -17,19 +17,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { PlusCircle, Code2, Users, PlayCircle } from 'lucide-react'
+import { PlusCircle, Code2, Users, PlayCircle, LoaderCircle } from 'lucide-react'
 
 import { useRouter } from "next/navigation"
-
 
 const AddInterview = () => {
   const [open, setOpen] = useState(false);
   const [interviewType, setInterviewType] = useState("technical");
   const [role, setRole] = useState("");
   const [experience, setExperience] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleStart = async () => {
+    if (!role || !experience) {
+      alert("Please select both role and experience");
+      return;
+    }
+
+    setLoading(true);
     try {
       const response = await fetch('/api/interviews', {
         method: 'POST',
@@ -53,7 +59,10 @@ const AddInterview = () => {
       router.push('/dashboard/interview/' + data.mockId);
     } catch (error) {
       console.error('Error creating interview:', error);
-      
+      // Optional: Add error handling UI
+      alert('Failed to start interview. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -150,10 +159,20 @@ const AddInterview = () => {
           <DialogFooter>
             <button 
               onClick={handleStart} 
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors"
+              disabled={loading}
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors disabled:opacity-50"
             >
-              <PlayCircle className="w-5 h-5" />
-              Start Interview
+              {loading ? (
+                <>
+                  <LoaderCircle className="mr-2 h-5 w-5 animate-spin" />
+                  Generating Interview
+                </>
+              ) : (
+                <>
+                  <PlayCircle className="w-5 h-5" />
+                  Start Interview
+                </>
+              )}
             </button>
           </DialogFooter>
         </DialogContent>
@@ -163,4 +182,3 @@ const AddInterview = () => {
 };
 
 export default AddInterview;
-
