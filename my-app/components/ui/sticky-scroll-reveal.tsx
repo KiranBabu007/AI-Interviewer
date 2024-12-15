@@ -21,7 +21,7 @@ export const StickyScroll = ({
     // uncomment line 22 and comment line 23 if you DONT want the overflow container and want to have it change on the entire page scroll
     //  target: ref,
      container: ref,
-    offset: ["start start", "end start"],
+    offset: ["start start", "end end"],
   });
   const cardLength = content.length;
 
@@ -72,13 +72,13 @@ export const StickyScroll = ({
       <div className="div relative flex items-start px-2 py-2">
         <div className="max-w-2xl z-20">
           {content.map((item, index) => (
-            <div key={item.title + index} className="my-20">
+            <div key={item.title + index+1} className="my-20">
               <motion.h2
                 initial={{
                   opacity: 0,
                 }}
                 animate={{
-                  opacity: activeCard === index ? 1 : 0.7,
+                  opacity: activeCard === index ? 1 : 0.3,
                 }}
                 className="text-2xl font-bold text-slate-100"
               >
@@ -89,7 +89,7 @@ export const StickyScroll = ({
                   opacity: 0,
                 }}
                 animate={{
-                  opacity: activeCard === index ? 1 : 0.7,
+                  opacity: activeCard === index ? 1 : 0.3,
                 }}
                 className="text-kg text-slate-300 max-w-sm mt-10"
               >
