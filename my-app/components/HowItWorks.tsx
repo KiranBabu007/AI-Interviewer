@@ -21,7 +21,7 @@ const content = [
       "Enable your camera and microphone permissions. These are essential for a realistic interview experience, allowing our AI to analyze both your verbal responses and non-verbal cues for comprehensive feedback.",
     content: (
       <div className="h-full w-full bg-[linear-gradient(to_bottom_right,var(--blue-500),var(--cyan-500))] flex items-center justify-center text-white">
-        <Image src="/intselect.png" width={400} height={400} alt=""/>
+        <Image src="/cam.png" width={400} height={400} alt=""/>
       </div>
     ),
   },
@@ -31,7 +31,7 @@ const content = [
       "Engage in a dynamic conversation with our AI interviewer. Answer questions naturally through speech, just like in a real interview. The AI adapts its questions based on your responses, creating a personalized interview experience.",
     content: (
       <div className="h-full w-full bg-[linear-gradient(to_bottom_right,var(--emerald-500),var(--green-500))] flex items-center justify-center text-white">
-        <Image src="/intselect.png" width={400} height={400} alt=""/>
+        <Image src="/question.png" width={400} height={400} alt=""/>
       </div>
     ),
   },
@@ -41,7 +41,7 @@ const content = [
       "Your responses are recorded and analyzed in real-time. Our AI evaluates your communication skills, technical knowledge, and professional competencies throughout the interview session.",
     content: (
       <div className="h-full w-full bg-[linear-gradient(to_bottom_right,var(--orange-500),var(--yellow-500))] flex items-center justify-center text-white">
-        <Image src="/intselect.png" width={400} height={400} alt=""/>
+        <Image src="/record.png" width={400} height={400} alt=""/>
       </div>
     ),
   },
@@ -51,7 +51,7 @@ const content = [
       "Receive a detailed evaluation report immediately after your interview. Get insights on your strengths, areas for improvement, and specific recommendations to enhance your interview performance.",
     content: (
       <div className="h-full w-full bg-[linear-gradient(to_bottom_right,var(--red-500),var(--pink-500))] flex items-center justify-center text-white">
-        <Image src="/intselect.png" width={400} height={400} alt=""/>
+        <Image src="/feedback.png" width={400} height={400} alt=""/>
       </div>
     ),
   }
