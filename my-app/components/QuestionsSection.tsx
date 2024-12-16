@@ -30,7 +30,7 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({ mockInterviewQuesti
       <h2 className='my-5 text-md md:text-lg text-white'>
         {mockInterviewQuestion[activeQuestionIndex]?.question}
       </h2>
-      <Volume2 className="cursor-pointer" onClick={() => textToSpeech(mockInterviewQuestion[activeQuestionIndex]?.question)} />
+      <Volume2 className="cursor-pointer bg-black text-white" onClick={() => textToSpeech(mockInterviewQuestion[activeQuestionIndex]?.question)} />
       <div className='border rounded-lg p-5 opacity-70 bg-gray-100 mt-20'>
         <h2 className='flex gap-2 items-center text-primary'>
           <Lightbulb />
