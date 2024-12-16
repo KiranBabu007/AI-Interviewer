@@ -8,8 +8,8 @@ export default function Page() {
     <section className="relative flex h-32 items-end bg-gray-900 lg:col-span-5 lg:h-full xl:col-span-6">
     <Image
         alt=""
-        width={100}
-        height={100}
+        width={1000}
+        height={1000}
        src="/ai.png"
         className="absolute inset-0 h-full w-full object-cover opacity-80"
       />
