@@ -41,7 +41,7 @@ const content = [
       "Your responses are recorded and analyzed in real-time. Our AI evaluates your communication skills, technical knowledge, and professional competencies throughout the interview session.",
     content: (
       <div className="h-full w-full bg-[linear-gradient(to_bottom_right,var(--orange-500),var(--yellow-500))] flex items-center justify-center text-white">
-        <Image src="/record.png" width={400} height={400} alt=""/>
+        Webcam
       </div>
     ),
   },
@@ -51,7 +51,7 @@ const content = [
       "Receive a detailed evaluation report immediately after your interview. Get insights on your strengths, areas for improvement, and specific recommendations to enhance your interview performance.",
     content: (
       <div className="h-full w-full bg-[linear-gradient(to_bottom_right,var(--red-500),var(--pink-500))] flex items-center justify-center text-white">
-        <Image src="/feedback.png" width={400} height={400} alt=""/>
+        Report
       </div>
     ),
   }
