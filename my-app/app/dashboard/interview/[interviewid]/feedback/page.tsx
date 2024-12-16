@@ -60,8 +60,8 @@ const Feedback: React.FC = () => {
   }
 
   return (
-    <BackgroundBeamsWithCollision>
-    <div className='p-10 bg-black h-full'>
+    
+    <div className='p-10 bg-black h-screen'>
       <h2 className='text-3xl font-bold text-green-600'>Congratulations!</h2>
       <h2 className='font-bold text-2xl text-white'>Here is your interview feedback</h2>
       
@@ -103,7 +103,7 @@ const Feedback: React.FC = () => {
         Go Home
       </Button>
     </div>
-    </BackgroundBeamsWithCollision>
+    
   );
 };
 
