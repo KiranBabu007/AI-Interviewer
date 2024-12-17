@@ -5,7 +5,7 @@ import AboutUs from '@/components/About'
 import HowItWorks  from '@/components/HowItWorks'
 import Navbar from '@/components/Navbar'
 
-const page = () => {
+const Page = () => {
   const aboutRef = useRef<HTMLDivElement>(null);
   const howItWorksRef = useRef<HTMLDivElement>(null);
 
@@ -30,4 +30,4 @@ const page = () => {
   )
 }
 
-export default page
+export default Page

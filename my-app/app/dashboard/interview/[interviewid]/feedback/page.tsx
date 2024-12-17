@@ -8,7 +8,7 @@ import {
 import { ChevronsUpDown } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useParams, useRouter } from 'next/navigation';
-import { BackgroundBeamsWithCollision } from "@/components/ui/background-beams-with-collision";
+
 interface FeedbackItem {
   question: string;
   rating: string;

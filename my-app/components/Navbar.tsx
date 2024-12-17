@@ -10,8 +10,8 @@ const Navbar = ({
   onAboutClick,
   onHowItWorksClick,
 }: {
-  onAboutClick: () => void;
-  onHowItWorksClick: () => void;
+  onAboutClick?: () => void;
+  onHowItWorksClick?: () => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname(); // Get the current pathname
