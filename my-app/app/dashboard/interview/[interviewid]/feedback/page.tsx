@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   Collapsible,
   CollapsibleContent,
@@ -23,10 +23,8 @@ const Feedback: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  useEffect(() => {
-    GetFeedback();
-  }, []);
-  const GetFeedback = async () => {
+
+  const GetFeedback = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/interviews/${params.interviewid}/feedback`, {
@@ -42,14 +40,17 @@ const Feedback: React.FC = () => {
 
       const data = await response.json();
       setFeedbackList(data.feedbackList);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching feedback:', error);
-      setError(error.message);
+      setError(error instanceof Error ? error.message : 'An unknown error occurred');
     } finally {
       setLoading(false);
     }
-    
-  };
+  }, [params.interviewid]);
+
+  useEffect(() => {
+    GetFeedback();
+  }, [GetFeedback]);
 
   if (loading) {
     return <div className='p-10'>Loading feedback...</div>;
@@ -60,7 +61,6 @@ const Feedback: React.FC = () => {
   }
 
   return (
-    
     <div className='p-10 bg-black h-screen'>
       <h2 className='text-3xl font-bold text-green-600'>Congratulations!</h2>
       <h2 className='font-bold text-2xl text-white'>Here is your interview feedback</h2>
@@ -103,7 +103,6 @@ const Feedback: React.FC = () => {
         Go Home
       </Button>
     </div>
-    
   );
 };
 

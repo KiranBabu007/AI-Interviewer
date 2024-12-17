@@ -2,19 +2,30 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Webcam from 'react-webcam';
 import useSpeechToText from 'react-hook-speech-to-text';
 import { Mic, StopCircle } from 'lucide-react';
 import { useUser } from '@clerk/nextjs';
 
+// Define a more specific interface for interview data
+interface InterviewData {
+  mockId?: string;
+  jobPosition?: string;
+  // Add any other properties you might need
+}
+
 interface RecordAnswerSectionProps {
   mockInterviewQuestion: { question: string }[];
   activeQuestionIndex: number;
-  interviewData: string[];
+  interviewData: InterviewData | null;
 }
 
-const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({ mockInterviewQuestion, activeQuestionIndex, interviewData }) => {
+const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({ 
+  mockInterviewQuestion, 
+  activeQuestionIndex, 
+  interviewData 
+}) => {
   const [userAnswer, setUserAnswer] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const { user } = useUser();
@@ -36,25 +47,8 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({ mockInterview
     typeof result === 'string' ? result : result.transcript
   ).join(' ');
 
-  useEffect(() => {
-    setUserAnswer(completeTranscript);
-  }, [completeTranscript]);
-
-  useEffect(() => {
-    if (!isRecording && userAnswer.length > 10) {
-      UpdateUserAnswer();
-    }
-  }, [isRecording, userAnswer]);
-
-  const StartStopRecording = async () => {
-    if (isRecording) {
-      stopSpeechToText();
-    } else {
-      startSpeechToText();
-    }
-  };
-
-  const UpdateUserAnswer = async () => {
+  // Memoize UpdateUserAnswer to prevent unnecessary re-renders
+  const UpdateUserAnswer = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch('/api/user-answers', {
@@ -83,6 +77,31 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({ mockInterview
     } finally {
       setResults([]);
       setLoading(false);
+    }
+  }, [
+    mockInterviewQuestion, 
+    activeQuestionIndex, 
+    interviewData, 
+    userAnswer, 
+    user?.primaryEmailAddress?.emailAddress, 
+    setResults
+  ]);
+
+  useEffect(() => {
+    setUserAnswer(completeTranscript);
+  }, [completeTranscript]);
+
+  useEffect(() => {
+    if (!isRecording && userAnswer.length > 10) {
+      UpdateUserAnswer();
+    }
+  }, [isRecording, userAnswer, UpdateUserAnswer]);
+
+  const StartStopRecording = async () => {
+    if (isRecording) {
+      stopSpeechToText();
+    } else {
+      startSpeechToText();
     }
   };
 
