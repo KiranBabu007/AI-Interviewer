@@ -5,21 +5,27 @@ import { BackgroundBeams } from "@/components/ui/background-beams";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useParams} from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import React from "react";
 
+// Define interfaces for your data structures
+interface InterviewData {
+  mockId?: string;
+  // Add other properties as needed
+}
+
+interface MockInterviewQuestion {
+  question: string;
+  // Add other properties as needed
+}
 
 const Page = () => {
-  const [interviewDetails, setInterviewDetails] = React.useState<any>(null);
-  const [questions, setQuestions] = React.useState<any>(null);
-  const [activeQuestionIndex, setActiveQuestionIndex] = React.useState<number>(0);
+  const [interviewDetails, setInterviewDetails] = useState<InterviewData | null>(null);
+  const [questions, setQuestions] = useState<MockInterviewQuestion[] | null>(null);
+  const [activeQuestionIndex, setActiveQuestionIndex] = useState<number>(0);
   const interviewId = useParams().interviewid;
   
-  useEffect(() => {
-    GetInterviewDetails();
-  },[]);
-
-  const GetInterviewDetails = async () => {
+  const GetInterviewDetails = useCallback(async () => {
     try {
       const response = await fetch(`/api/interviews/${interviewId}`, {
         method: 'GET',
@@ -38,7 +44,11 @@ const Page = () => {
     } catch (error: unknown) {
       console.error('Error fetching interview details:', error);
     }
-  }
+  }, [interviewId]);
+
+  useEffect(() => {
+    GetInterviewDetails();
+  }, [GetInterviewDetails]);
 
   return (
     <div className="relative h-screen w-full bg-neutral-950 flex flex-col overflow-hidden">
@@ -46,20 +56,19 @@ const Page = () => {
       <BackgroundBeams className="absolute inset-0 z-0" />
       
       {/* Main Content - Higher z-index */}
-      
       <div className="relative flex-grow overflow-auto py-8 z-10">
         <div className="container mx-auto px-4 h-full">
           <div className='grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 h-full'>
             <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-6 border border-white/5 shadow-xl h-full">
               <QuestionsSection
-                mockInterviewQuestion={questions} 
+                mockInterviewQuestion={questions || []} 
                 activeQuestionIndex={activeQuestionIndex}
               />
             </div>
 
             <div className="bg-black/40 backdrop-blur-sm rounded-2xl border border-white/5 shadow-xl p-8 flex flex-col space-y-6">
               <RecordAnswerSection
-                mockInterviewQuestion={questions} 
+                mockInterviewQuestion={questions || []} 
                 activeQuestionIndex={activeQuestionIndex} 
                 interviewData={interviewDetails}
               />
@@ -69,12 +78,12 @@ const Page = () => {
                     Previous Question
                   </Button>
                 )}
-                {activeQuestionIndex !== questions?.length - 1 && (
+                {questions && activeQuestionIndex !== questions.length - 1 && (
                   <Button onClick={() => setActiveQuestionIndex(activeQuestionIndex + 1)}>
                     Next Question
                   </Button>
                 )}
-                {activeQuestionIndex === questions?.length - 1 && (
+                {questions && activeQuestionIndex === questions.length - 1 && (
                   <Link href={`/dashboard/interview/${interviewDetails?.mockId}/feedback`}>
                     <Button>End Interview</Button>
                   </Link>
@@ -87,6 +96,5 @@ const Page = () => {
     </div>
   );
 };
-
 
 export default Page;

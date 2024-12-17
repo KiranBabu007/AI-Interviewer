@@ -15,8 +15,8 @@ export const StickyScroll = ({
   }[];
   contentClassName?: string;
 }) => {
-  const [activeCard, setActiveCard] = React.useState(0);
-  const ref = useRef<any>(null);
+  const [activeCard, setActiveCard] = useState(0);
+  const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     // uncomment line 22 and comment line 23 if you DONT want the overflow container and want to have it change on the entire page scroll
     //  target: ref,
@@ -47,12 +47,12 @@ export const StickyScroll = ({
     "var(--orange-900)",
     "var(--pink-900)",
   ];
-  const linearGradients = [
+  
+  const linearGradients = React.useMemo(() => [
     "linear-gradient(to bottom right, var(--cyan-500), var(--emerald-500))",
     "linear-gradient(to bottom right, var(--pink-500), var(--indigo-500))",
     "linear-gradient(to bottom right, var(--orange-500), var(--yellow-500))",
-    
-  ];
+  ], []);
 
   const [backgroundGradient, setBackgroundGradient] = useState(
     linearGradients[0]
@@ -60,7 +60,7 @@ export const StickyScroll = ({
 
   useEffect(() => {
     setBackgroundGradient(linearGradients[activeCard % linearGradients.length]);
-  }, [activeCard]);
+  }, [activeCard, linearGradients]);
 
   return (
     <motion.div
@@ -73,7 +73,7 @@ export const StickyScroll = ({
       <div className="div relative flex items-start px-2 py-2">
         <div className="max-w-2xl z-20">
           {content.map((item, index) => (
-            <div key={item.title + index+1} className="my-20">
+            <div key={`${item.title}-${index}`} className="my-20">
               <motion.h2
                 initial={{
                   opacity: 0,
