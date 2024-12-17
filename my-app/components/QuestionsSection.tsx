@@ -30,6 +30,7 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
       alert("Sorry, your browser does not support text to speech");
     }
   };
+
   const router = useRouter();
   return (
     mockInterviewQuestion && (
@@ -68,6 +69,30 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
         </div>
         <h2 className="my-5 text-md md:text-lg text-white">
           {mockInterviewQuestion[activeQuestionIndex]?.question}
+=======
+  return mockInterviewQuestion && (
+    <div className='p-5  z-10 rounded-lg my-10'>
+      <div className='grid grid-cols-2 gap-5'>
+        {mockInterviewQuestion.map((question, index) => (
+          <div key={index}>
+            <h2 className={`p-2 bg-secondary text-black rounded-full text-xs md:text-sm text-center cursor-pointer ${activeQuestionIndex === index && 'bg-blue-600 text-black'}`}>
+              Question #{index + 1}
+            </h2>
+          </div>
+        ))}
+      </div>
+      <h2 className='my-5 text-md md:text-lg text-white'>
+        {mockInterviewQuestion[activeQuestionIndex]?.question}
+      </h2>
+      <Volume2 className="cursor-pointer bg-black text-white" onClick={() => textToSpeech(mockInterviewQuestion[activeQuestionIndex]?.question)} />
+      <div className='border rounded-lg p-5 opacity-70 bg-gray-100 mt-20'>
+        <h2 className='flex gap-2 items-center text-primary'>
+          <Lightbulb />
+          <strong>Note:</strong>
+        </h2>
+        <h2 className='text-sm text-primary my-2'>
+          Click on Record Answer when you want to answer the question. At the end of the interview, we will give you the feedback along with the correct answer for each question and your answer to compare it.
+
         </h2>
         <Volume2
           className="cursor-pointer"

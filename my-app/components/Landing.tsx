@@ -15,7 +15,7 @@ const Landing = () => {
     setTimeout(() => {
       router.push('/dashboard');
       setLoading(false);
-    }, 1500); // 1.5 seconds loading time
+    }, 400);
   };
 
   return (
