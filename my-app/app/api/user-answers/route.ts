@@ -22,18 +22,6 @@ export async function POST(request: Request) {
       activeQuestionIndex, 
       interviewData, 
       userAnswer 
-    }: {
-      mockInterviewQuestion: { question: string; answer: string };
-      activeQuestionIndex: number;
-      interviewData: { id: number;
-        jsonMockResp: string;
-        jobPosition?: string | undefined;
-        jobType: string;
-        jobExperience: string;
-        createdBy: string;
-        createdAt?: string | null;
-        mockId: string; };
-      userAnswer: string;
     } = req;
 
     // Construct feedback prompt
@@ -47,12 +35,11 @@ export async function POST(request: Request) {
     // Get AI feedback
     const result = await chatSession.sendMessage(feedbackPrompt);
     const mockJsonResp = (await result.response.text())
-      .replace('json', '')
-      .replace('', '');
+    .replace('```json','')
+    .replace('```','');
     
     // Parse AI response
     const JsonFeedbackResp = JSON.parse(mockJsonResp);
-  
     const insertData = {
       mockIdRef: interviewData.mockId,    // This field name was critical - matches schema exactly
       question: mockInterviewQuestion[activeQuestionIndex].question,
