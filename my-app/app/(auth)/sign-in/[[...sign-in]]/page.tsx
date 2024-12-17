@@ -7,11 +7,13 @@ export default function Page() {
   <div className="lg:grid lg:min-h-screen lg:grid-cols-12">
     <section className="relative flex h-32 items-end bg-gray-900 lg:col-span-5 lg:h-full xl:col-span-6">
       <Image
-        alt=""
-        width={1000}
-        height={1000}
+        alt="AI Interviewer background"
+        width={3000}  
+        height={2000} 
         src="/ai.png"
         className="absolute inset-0 h-full w-full object-cover opacity-80"
+        quality={100}
+        priority
       />
 
       <div className="hidden lg:relative lg:block lg:p-12">
