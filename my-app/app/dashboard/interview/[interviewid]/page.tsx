@@ -4,16 +4,17 @@ import RecordAnswerSection from "@/components/RecordAnswerSection";
 import { BackgroundBeams } from "@/components/ui/background-beams";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams} from "next/navigation";
 import { useEffect } from "react";
 import React from "react";
+
 
 const Page = () => {
   const [interviewDetails, setInterviewDetails] = React.useState<any>(null);
   const [questions, setQuestions] = React.useState<any>(null);
   const [activeQuestionIndex, setActiveQuestionIndex] = React.useState<number>(0);
   const interviewId = useParams().interviewid;
-
+  
   useEffect(() => {
     GetInterviewDetails();
   },[]);
@@ -45,6 +46,7 @@ const Page = () => {
       <BackgroundBeams className="absolute inset-0 z-0" />
       
       {/* Main Content - Higher z-index */}
+      
       <div className="relative flex-grow overflow-auto py-8 z-10">
         <div className="container mx-auto px-4 h-full">
           <div className='grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 h-full'>
