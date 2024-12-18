@@ -10,7 +10,7 @@ const Page = () => {
   const requestPermissions = async (type: 'audio' | 'video') => {
     try {
       if ((type === 'audio' && audioPermission) || (type === 'video' && videoPermission)) {
-        // Deactivate permission
+        
         if (type === 'audio') setAudioPermission(false);
         if (type === 'video') setVideoPermission(false);
         return;
@@ -21,11 +21,11 @@ const Page = () => {
         video: type === 'video'
       });
 
-      // Set permission state
+      
       if (type === 'audio') setAudioPermission(true);
       if (type === 'video') setVideoPermission(true);
 
-      // Stop tracks after getting permission
+      
       stream.getTracks().forEach(track => track.stop());
     } catch (err) {
       console.error(`${type} permission error:`, err);
@@ -39,7 +39,7 @@ const Page = () => {
       <div className="h-screen w-full dark:bg-black bg-white dark:bg-grid-white/[0.2] bg-grid-black/[0.2] relative flex">
         <div className="absolute pointer-events-none inset-0 flex dark:bg-black bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
         
-        {/* Left Panel */}
+     
         <div className="w-2/3 py-8 px-20 justify-start flex flex-col">
           <p className="text-2xl sm:text-5xl font-bold relative z-20 bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-500">
             Welcome to AI-Interviewer
@@ -82,7 +82,7 @@ const Page = () => {
             </div>
           </div>
 
-          {/* Instructions */}
+          
           <div className="space-y-4 bg-white p-8 rounded-lg bg-opacity-20">
             <h3 className="text-xl mb-4">Interview Guidelines</h3>
             <ul className="list-disc list-inside space-y-2 text-gray-300">
