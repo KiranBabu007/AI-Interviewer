@@ -90,7 +90,7 @@ const Page = () => {
               <li>Position yourself in front of the camera</li>
               <li>Speak clearly and maintain eye contact</li>
               <li>Have your resume ready for reference</li>
-              <li>The interview will last approximately 15-20 minutes</li>
+              
               <li>You can pause or end the interview at any time</li>
             </ul>
           </div>
