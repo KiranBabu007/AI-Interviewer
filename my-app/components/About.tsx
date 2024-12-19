@@ -7,12 +7,11 @@ const AboutUs = () => {
 const people = [
   {
     id: 1,
-    name: "Kiran Babu",
+    name: "Sidharth Manikuttan",
     designation: "Software Engineer",
     image:
-      "https://media.licdn.com/dms/image/v2/D5603AQHzwPub7LODng/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1732730797258?e=1740009600&v=beta&t=PL-DrRTl5X4BPLZ-M3r9b9zAtfiZjEHLcEG6BpW8ZOE",
-  },
-  {
+      "https://media.licdn.com/dms/image/v2/D5603AQHYc-kTlfUOMA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1721754297801?e=1740009600&v=beta&t=SorNbDX0Oh1CeeAFiWQIaGVgFy3SYPqIG8vVXgORk5E",
+  },{
     id: 2,
     name: "Indrajith S Nair",
     designation: "Software Engineer",
@@ -21,11 +20,13 @@ const people = [
   },
   {
     id: 3,
-    name: "Sidharth Manikuttan",
+    name: "Kiran Babu",
     designation: "Software Engineer",
     image:
-      "https://media.licdn.com/dms/image/v2/D5603AQHYc-kTlfUOMA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1721754297801?e=1740009600&v=beta&t=SorNbDX0Oh1CeeAFiWQIaGVgFy3SYPqIG8vVXgORk5E",
+      "https://media.licdn.com/dms/image/v2/D5603AQHzwPub7LODng/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1732730797258?e=1740009600&v=beta&t=PL-DrRTl5X4BPLZ-M3r9b9zAtfiZjEHLcEG6BpW8ZOE",
   },
+  
+  
 
 
 ];
