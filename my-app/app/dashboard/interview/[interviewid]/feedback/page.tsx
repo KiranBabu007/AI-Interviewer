@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Collapsible,
   CollapsibleContent,
@@ -8,6 +9,8 @@ import {
 import { ChevronsUpDown } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useParams, useRouter } from 'next/navigation';
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface FeedbackItem {
   question: string;
@@ -53,55 +56,112 @@ const Feedback: React.FC = () => {
   }, [GetFeedback]);
 
   if (loading) {
-    return <div className='p-10'>Loading feedback...</div>;
+    return (
+      <div className="p-8 space-y-4 bg-black h-screen">
+        <Skeleton className="h-12 w-64 bg-gray-800" />
+        <Skeleton className="h-8 w-96 bg-gray-800" />
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-24 w-full bg-gray-800" />
+          ))}
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className='p-10'>Error: {error}</div>;
+    return (
+      <Card className="p-6 bg-red-900/10 border-red-900/20">
+        <div className="text-red-500">Error: {error}</div>
+        <Button variant="outline" className="mt-4" onClick={() => GetFeedback()}>
+          Retry
+        </Button>
+      </Card>
+    );
   }
 
   return (
-    <div className='p-10 bg-black h-screen'>
-      <h2 className='text-3xl font-bold text-green-600'>Congratulations!</h2>
-      <h2 className='font-bold text-2xl text-white'>Here is your interview feedback</h2>
-      
-      {feedbackList.length === 0 ? (
-        <h2 className='font-bold text-lg text-green-500'>No interview Feedback</h2>
-      ) : (
-        <>
-          <h2 className='text-sm text-gray-500'>
-            Find below interview questions with correct answers, your answer and feedback for improvements for your next interview
-          </h2>
-          
-          {feedbackList.map((item, index) => (
-            <Collapsible key={index} className='mt-7'>
-              <CollapsibleTrigger className='p-2 flex justify-between bg-secondary rounded-lg my-2 text-left gap-7 w-full'>
-                {item.question} <ChevronsUpDown className='h-4'/>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className='flex flex-col gap-2'>
-                  <h2 className='text-red-500 p-2 border rounded-lg'>
-                    <strong>Rating:</strong> {item.rating}
-                  </h2>
-                  <h2 className='p-2 border rounded-lg bg-red-50 text-sm text-red-900'>
-                    <strong>Your Answer: </strong>{item.userAns}
-                  </h2>
-                  <h2 className='p-2 border rounded-lg bg-green-50 text-sm text-green-900'>
-                    <strong>Correct Answer Looks Like: </strong>{item.correctAns}
-                  </h2>
-                  <h2 className='p-2 border rounded-lg bg-blue-50 text-sm text-primary'>
-                    <strong>Feedback: </strong>{item.feedback}
-                  </h2>
-                </div>
-              </CollapsibleContent>
-            </Collapsible>      
-          ))}
-        </>
-      )}
-      
-      <Button className='mt-5' onClick={() => router.replace('/dashboard')}>
-        Go Home
-      </Button>
+    <div className="min-h-screen bg-black text-white p-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-4xl mx-auto space-y-6"
+      >
+        <div className="space-y-2">
+          <motion.h1 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-4xl font-bold bg-gradient-to-r text-green-500 "
+          >
+            Congratulations! 🎉
+          </motion.h1>
+          <h2 className="text-2xl font-semibold text-white">Interview Feedback</h2>
+          <p className="text-gray-400 text-sm">
+            Review your performance and prepare for future success
+          </p>
+        </div>
+
+        {feedbackList.length === 0 ? (
+          <Card className="bg-gray-900/50 border-gray-800">
+            <CardContent className="p-6">
+              <p className="text-lg text-gray-400">No interview feedback available yet.</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <AnimatePresence>
+            <motion.div className="space-y-4">
+              {feedbackList.map((item, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Collapsible className="border border-gray-800 rounded-lg bg-gray-900/50 hover:bg-gray-900/70 transition-colors">
+                    <CollapsibleTrigger className="w-full p-4 flex items-center justify-between text-left">
+                      <span className="text-gray-100">{item.question}</span>
+                      <ChevronsUpDown className="h-4 w-4 text-gray-400 transition-transform duration-200" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="p-4 space-y-3 border-t border-gray-800">
+                        <div className="p-3 rounded-lg bg-gray-800/50 border border-gray-700">
+                          <strong className="text-green-500">Rating:</strong>
+                          <span className="ml-2 text-gray-300">{item.rating}</span>
+                        </div>
+                        <div className="p-3 rounded-lg bg-gray-800/50 border border-gray-700">
+                          <strong className="text-blue-500">Your Answer:</strong>
+                          <p className="mt-1 text-gray-300">{item.userAns}</p>
+                        </div>
+                        <div className="p-3 rounded-lg bg-gray-800/50 border border-gray-700">
+                          <strong className="text-purple-500">Ideal Answer:</strong>
+                          <p className="mt-1 text-gray-300">{item.correctAns}</p>
+                        </div>
+                        <div className="p-3 rounded-lg bg-gray-800/50 border border-gray-700">
+                          <strong className="text-yellow-500">Feedback:</strong>
+                          <p className="mt-1 text-gray-300">{item.feedback}</p>
+                        </div>
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                </motion.div>
+              ))}
+            </motion.div>
+          </AnimatePresence>
+        )}
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+        >
+          <Button 
+            onClick={() => router.replace('/dashboard')}
+            className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white"
+          >
+            Return to Dashboard
+          </Button>
+        </motion.div>
+      </motion.div>
     </div>
   );
 };
