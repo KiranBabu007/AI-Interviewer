@@ -38,7 +38,7 @@ const people = [
           About Us
         </h2>
         <p className="max-w-2xl mx-auto text-sm md:text-lg text-neutral-700 dark:text-neutral-400 mt-8 leading-relaxed">
-          We're building an innovative AI-powered interview preparation platform that helps candidates practice and perfect their interview skills. Our advanced AI technology provides real-time feedback, personalized questions, and comprehensive performance analysis.
+          We&apos;re building an innovative AI-powered interview preparation platform that helps candidates practice and perfect their interview skills. Our advanced AI technology provides real-time feedback, personalized questions, and comprehensive performance analysis.
         </p>
 
         
