@@ -1,21 +1,19 @@
 import { NextResponse } from 'next/server';
 import { chatSession } from '@/utils/GeminiAiModel';
 import { db } from '@/utils/db';
-import { UserAnswer } from '@/utils/schema';
+import { UserAnswer, MockInterview } from '@/utils/schema';
+import { eq } from 'drizzle-orm';
 import moment from 'moment';
 import { auth, currentUser } from '@clerk/nextjs/server';
 
 export async function POST(request: Request) {
   try {
-    // Authenticate the request
-    
     const { userId } = await auth();
     const user = await currentUser();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Parse the request body
     const req = await request.json();
     const { 
       mockInterviewQuestion, 
@@ -24,24 +22,41 @@ export async function POST(request: Request) {
       userAnswer 
     } = req;
 
-    // Construct feedback prompt
+    // Simplified feedback prompt
     const feedbackPrompt =
-      `Question: ${mockInterviewQuestion[activeQuestionIndex]?.question}, ` +
-      `User Answer: ${userAnswer}, ` +
-      `Depends on question and user answer for given interview question, ` +
-      `please give use rating for answer and feedback as area of improvement if any ` +
-      'in just 3 to 5 lines in JSON format with rating field and feedback field';
+      `Rate this interview answer from 1-10 and provide one sentence of feedback. ` +
+      `Question: "${mockInterviewQuestion[activeQuestionIndex]?.question}" ` +
+      `Answer: "${userAnswer}" ` +
+      `Return only JSON: {"rating": number, "feedback": "string"}`;
 
-    // Get AI feedback
     const result = await chatSession.sendMessage(feedbackPrompt);
     const mockJsonResp = (await result.response.text())
-    .replace('```json','')
-    .replace('```','');
+      .replace('```json','')
+      .replace('```','');
     
-    // Parse AI response
     const JsonFeedbackResp = JSON.parse(mockJsonResp);
+
+    // Modified next question prompt that considers job type
+    const nextQuestionPrompt = 
+      `You are conducting a ${interviewData.jobType.toLowerCase()} interview for a ${interviewData.jobExperience} ${interviewData.jobPosition} position. ` +
+      `Previous Q&A:\n` +
+      `Q: "${mockInterviewQuestion[activeQuestionIndex]?.question}"\n` +
+      `A: "${userAnswer}"\n` +
+      `Generate one follow back ${interviewData.jobType.toLowerCase()} interview question and brief model answer. ` +
+      `For HR type, focus on behavioral and situational questions. ` +
+      `For Technical type, focus on technical concepts and problem-solving. ` +
+      `Return only JSON: {"question": "string", "answer": "string"}`;
+
+    const nextQuestionResult = await chatSession.sendMessage(nextQuestionPrompt);
+    const nextQuestionJson = (await nextQuestionResult.response.text())
+      .replace('```json','')
+      .replace('```','');
+    
+    const nextQuestion = JSON.parse(nextQuestionJson);
+
+    // Insert current answer to UserAnswer table
     const insertData = {
-      mockIdRef: interviewData.mockId,    // This field name was critical - matches schema exactly
+      mockIdRef: interviewData.mockId,
       question: mockInterviewQuestion[activeQuestionIndex].question,
       correctAns: mockInterviewQuestion[activeQuestionIndex]?.answer || null,
       userAns: userAnswer || null,
@@ -50,20 +65,40 @@ export async function POST(request: Request) {
       userEmail: user?.emailAddresses?.[0]?.emailAddress || null,
       createdAt: moment().format("DD-MM-YYYY")
     };
-    // Insert answer to database
     await db.insert(UserAnswer).values(insertData);
 
-    // Return success response
+    // Get current mock interview data
+    const currentMock = await db.select()
+      .from(MockInterview)
+      .where(eq(MockInterview.mockId, interviewData.mockId));
+
+    if (currentMock.length === 0) {
+      throw new Error('Mock interview not found');
+    }
+
+    // Parse current questions and add new question
+    const currentQuestions = JSON.parse(currentMock[0].jsonMockResp);
+    currentQuestions.push(nextQuestion);
+
+    // Update MockInterview table with new question
+    await db.update(MockInterview)
+      .set({
+        jsonMockResp: JSON.stringify(currentQuestions)
+      })
+      .where(eq(MockInterview.mockId, interviewData.mockId));
+
+    // Return success response with feedback and next question
     return NextResponse.json({ 
       message: "User Answer Recorded Successfully",
-      feedback: JsonFeedbackResp
+      feedback: JsonFeedbackResp,
+      nextQuestion: nextQuestion
     }, { status: 200 });
 
   } catch (error) {
     console.error('Error processing interview answer:', error);
     return NextResponse.json({ 
       error: 'Failed to process interview answer',
-      details: 'Internal server error'
+      details: error instanceof Error ? error.message : 'Internal server error'
     }, { status: 500 });
   }
 }
