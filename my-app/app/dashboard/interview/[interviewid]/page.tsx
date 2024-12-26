@@ -44,7 +44,7 @@ const Page = () => {
     } catch (error: unknown) {
       console.error('Error fetching interview details:', error);
     }
-  }, [interviewId]);
+  }, [interviewId,activeQuestionIndex]);
 
   useEffect(() => {
     GetInterviewDetails();
@@ -73,17 +73,17 @@ const Page = () => {
                 interviewData={interviewDetails}
               />
               <div className='mt-auto flex justify-end gap-6'>
-                {activeQuestionIndex > 0 && (
+                {/* {activeQuestionIndex > 0 && (
                   <Button onClick={() => setActiveQuestionIndex(activeQuestionIndex - 1)}>
                     Previous Question
                   </Button>
-                )}
-                {questions && activeQuestionIndex !== questions.length - 1 && (
+                )} */}
+                {questions && activeQuestionIndex !== 2 && (
                   <Button onClick={() => setActiveQuestionIndex(activeQuestionIndex + 1)}>
                     Next Question
                   </Button>
                 )}
-                {questions && activeQuestionIndex === questions.length - 1 && (
+                {questions && activeQuestionIndex === 2 && (
                   <Link href={`/dashboard/interview/${interviewDetails?.mockId}/feedback`}>
                     <Button>End Interview</Button>
                   </Link>
