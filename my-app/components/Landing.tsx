@@ -11,7 +11,7 @@ const Landing = () => {
 
   const handleGetStarted = () => {
     setLoading(true);
-    // Simulate an async action (like API call or route change)
+    
     setTimeout(() => {
       router.push('/dashboard');
       setLoading(false);

@@ -56,7 +56,7 @@ const AddInterview = () => {
       router.push('/dashboard/interview/' + data.mockId);
     } catch (error) {
       console.error('Error creating interview:', error);
-      // Optional: Add error handling UI
+      
       alert('Failed to start interview. Please try again.');
     } finally {
       setLoading(false);
@@ -116,7 +116,10 @@ const AddInterview = () => {
                       <SelectValue placeholder="Select role" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="developer">Developer</SelectItem>
+                      <SelectItem value="full stack developer">Full Stack Developer</SelectItem>
+                      <SelectItem value="front end developer">Frontend Developer</SelectItem>
+                      <SelectItem value="backend developer">Backend Developer</SelectItem>
+                      <SelectItem value="python developer">Python Developer</SelectItem>
                       <SelectItem value="designer">Designer</SelectItem>
                       <SelectItem value="manager">Manager</SelectItem>
                     </SelectContent>

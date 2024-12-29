@@ -8,15 +8,15 @@ import { useParams} from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import React from "react";
 
-// Define interfaces for your data structures
+
 interface InterviewData {
   mockId?: string;
-  // Add other properties as needed
+  
 }
 
 interface MockInterviewQuestion {
   question: string;
-  // Add other properties as needed
+  
 }
 
 const Page = () => {
@@ -78,12 +78,12 @@ const Page = () => {
                     Previous Question
                   </Button>
                 )} */}
-                {questions && activeQuestionIndex !== 2 && (
+                {questions && activeQuestionIndex !== 1 && (
                   <Button onClick={() => setActiveQuestionIndex(activeQuestionIndex + 1)}>
                     Next Question
                   </Button>
                 )}
-                {questions && activeQuestionIndex === 2 && (
+                {questions && activeQuestionIndex === 1 && (
                   <Link href={`/dashboard/interview/${interviewDetails?.mockId}/feedback`}>
                     <Button>End Interview</Button>
                   </Link>
