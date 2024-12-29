@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Interviewer Project
 
-## Getting Started
+AI Interviewer is an advanced platform designed to simulate technical and HR interviews for aspiring software developers. It provides a dynamic, interactive experience with open mic capabilities and personalized feedback to help candidates prepare effectively for real-world interviews.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Open Mic Interview Sessions:** Simulate real-time HR and technical interviews with voice interaction.
+- **Personalized Feedback Reports:** Receive detailed reports after each session, highlighting performance and areas for improvement.
+- **Adaptive Question Levels:** Questions vary based on the user's skill level and selected topics.
+- **Focus Areas:** Choose between HR interview scenarios, technical coding questions, or both.
+- **AI-Driven Insights:** Tailored suggestions on how to improve your interview skills.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Tech Stack
 
-## Learn More
+- **Framework:** Next.js for server-side rendering and seamless user experience.
+- **UI Design:** Gemini for building a responsive and modern interface.
+- **Authentication:** Clerk for secure user authentication and management.
+- **AI Integration:** OpenAI's GPT API for generating dynamic interview questions and feedback.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Installation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Prerequisites
 
-## Deploy on Vercel
+- Node.js (v16 or later)
+- Clerk account and project setup
+- OpenAI API key
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Usage
+
+1. Sign up or log in using Clerk authentication.
+2. Choose your interview type: HR, technical, or both.
+3. Begin an open mic interview session.
+4. Review the personalized feedback report after the session, including actionable suggestions for improvement.
+
+---
+
+## Contributing
+
+We welcome contributions to make AI Interviewer even better! Follow these steps:
+
+1. Fork the repository.
+2. Create a feature branch:
+
+   ```bash
+   git checkout -b feature-name
+   ```
+
+3. Commit your changes:
+
+   ```bash
+   git commit -m "Add a brief description of your changes"
+   ```
+
+4. Push to the branch:
+
+   ```bash
+   git push origin feature-name
+   ```
+
+5. Open a Pull Request.
+
+---
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+## Acknowledgments
+
+- Inspired by interview preparation platforms.
+- Built with the support of Clerk, Gemini, and OpenAI technologies.
+
+---
+
+## Contact
+
+For inquiries, please reach out to [your-email@example.com](mailto:your-email@example.com).
