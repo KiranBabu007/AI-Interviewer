@@ -1,18 +1,15 @@
-"use client"
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import Webcam from 'react-webcam';
 import useSpeechToText from 'react-hook-speech-to-text';
-import { Mic, StopCircle } from 'lucide-react';
+import { Mic, StopCircle, Play, Pause } from 'lucide-react';
 import { useUser } from '@clerk/nextjs';
 
-// Define a more specific interface for interview data
 interface InterviewData {
   mockId?: string;
   jobPosition?: string;
-  // Add any other properties you might need
 }
 
 interface RecordAnswerSectionProps {
@@ -29,6 +26,12 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({
   const [userAnswer, setUserAnswer] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const { user } = useUser();
+  const [audioURL, setAudioURL] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const audioElementRef = useRef<HTMLAudioElement | null>(null);
+
   const {
     error,
     interimResult,
@@ -42,12 +45,53 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({
     useLegacyResults: false
   });
 
-  // Combine final results into complete transcript
   const completeTranscript = results.map(result => 
     typeof result === 'string' ? result : result.transcript
   ).join(' ');
 
-  // Memoize UpdateUserAnswer to prevent unnecessary re-renders
+  const startAudioRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorderRef.current = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorderRef.current.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        setAudioURL(audioUrl);
+        audioChunksRef.current = [];
+      };
+
+      mediaRecorderRef.current.start();
+    } catch (err) {
+      console.error('Error accessing microphone:', err);
+    }
+  };
+
+  const stopAudioRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+    }
+  };
+
+  const togglePlayback = () => {
+    if (!audioElementRef.current) return;
+    
+    if (isPlaying) {
+      audioElementRef.current.pause();
+    } else {
+      audioElementRef.current.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
   const UpdateUserAnswer = useCallback(async () => {
     setLoading(true);
     try {
@@ -66,7 +110,6 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({
       });
 
       const result = await response.json();
-      console.log('result:', result);
       if (response.ok) {
         setUserAnswer('');
       } else {
@@ -100,10 +143,23 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({
   const StartStopRecording = async () => {
     if (isRecording) {
       stopSpeechToText();
+      stopAudioRecording();
     } else {
       startSpeechToText();
+      startAudioRecording();
     }
   };
+
+  useEffect(() => {
+    const audioElement = audioElementRef.current;
+    if (audioElement) {
+      const handleEnded = () => setIsPlaying(false);
+      audioElement.addEventListener('ended', handleEnded);
+      return () => {
+        audioElement.removeEventListener('ended', handleEnded);
+      };
+    }
+  }, []);
 
   if (error) {
     return (
@@ -117,27 +173,43 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({
 
   return (
     <div className='flex flex-col justify-center items-center'>
-      <div className='flex flex-col justify-center items-center rounded-lg bg-black  '>
+      <div className='flex flex-col justify-center items-center rounded-lg bg-black'>
         <Image src={'/webcam.png'} width={200} height={200} className='absolute' alt='webcam image' />
         <Webcam mirrored={true} style={{ height: 300, width: '100%', zIndex: 10 }} />
       </div>
       
-      <Button disabled={loading} variant="outline" className="my-3" onClick={StartStopRecording}>
-        {isRecording ? (
-          <h2 className="text-red-600 items-center animate-pulse flex gap-2">
-            <StopCircle /> Stop Recording...
-          </h2>
-        ) : (
-          <h2 className="text-primary flex gap-2 items-center">
-            <Mic /> Record Answer
-          </h2>
-        )}
-      </Button>
+      <div className="flex gap-2 my-3">
+        <Button disabled={loading} variant="outline" onClick={StartStopRecording}>
+          {isRecording ? (
+            <h2 className="text-red-600 items-center animate-pulse flex gap-2">
+              <StopCircle /> Stop Recording...
+            </h2>
+          ) : (
+            <h2 className="text-primary flex gap-2 items-center">
+              <Mic /> Record Answer
+            </h2>
+          )}
+        </Button>
 
-      {/* Transcription Display */}
+        {audioURL && (
+          <Button 
+            variant="outline" 
+            onClick={togglePlayback}
+            className="flex gap-2 items-center"
+          >
+            {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+            {isPlaying ? 'Pause' : 'Play'} Recording
+          </Button>
+        )}
+      </div>
+
+      {audioURL && (
+        <audio ref={audioElementRef} src={audioURL} className="hidden" />
+      )}
+
       <Card className="w-full max-w-2xl">
         <CardContent className="pt-3">
-          <div >
+          <div>
             <div className="flex items-center justify-between">
               <h3 className="font-semibold">Your Answer:</h3>
               {isRecording && (
@@ -148,7 +220,6 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({
             </div>
             <div className="text-gray-700 min-h-[100px] whitespace-pre-wrap">
               {completeTranscript}
-              {/* Show interim results in a slightly different style */}
               {interimResult && (
                 <span className="text-gray-500 italic"> {interimResult}</span>
               )}

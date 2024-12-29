@@ -10,7 +10,6 @@ export async function GET(request: Request, { params }: { params: { interviewid:
         if (!userId || !user?.emailAddresses?.[0]?.emailAddress) {
             return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
-        // Fetch the specific interview by its mockId
         const result = await db.select()
             .from(MockInterview)
             .where(eq(MockInterview.mockId, params.interviewid))
@@ -20,7 +19,6 @@ export async function GET(request: Request, { params }: { params: { interviewid:
             return new Response(JSON.stringify({ error: 'Interview not found' }), { status: 404 });
         }
 
-        // Parse the JSON mock response
         const interviewData = result[0];
         let mockInterviewQuestions;
         console.log('Interview Data:', interviewData);

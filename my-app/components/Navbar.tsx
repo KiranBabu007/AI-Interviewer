@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { usePathname } from 'next/navigation'; // Import usePathname for current route
+import { usePathname } from 'next/navigation'; 
 import { UserButton } from '@clerk/nextjs';
 import { Menu, X } from 'lucide-react';
 
@@ -14,9 +14,9 @@ const Navbar = ({
   onHowItWorksClick?: () => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const pathname = usePathname(); // Get the current pathname
+  const pathname = usePathname(); 
 
-  const isHomePage = pathname === '/Home'; // Check if the current route is /Home
+  const isHomePage = pathname === '/Home'; 
 
   return (
     <nav className="bg-black text-white">
@@ -81,6 +81,7 @@ const Navbar = ({
                     </button>
                   </>
                 )}
+                
               </div>
             </div>
           </div>
@@ -127,6 +128,11 @@ const Navbar = ({
                 </button>
               </>
             )}
+            <div className="block">
+            <div className="ml-4 flex items-center md:ml-6">
+              <UserButton />
+            </div>
+          </div>
           </div>
         </div>
       )}

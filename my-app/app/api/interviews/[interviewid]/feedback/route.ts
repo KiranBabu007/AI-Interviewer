@@ -11,8 +11,6 @@ export async function GET(request: Request, { params }: { params: { interviewid:
         if (!userId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
-
-        // Fetch user answers for the specific mock interview
         const result = await db.select()
             .from(UserAnswer)
             .where(eq(UserAnswer.mockIdRef, params.interviewid))
