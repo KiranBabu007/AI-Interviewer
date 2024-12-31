@@ -46,7 +46,7 @@ export default function Page() {
       className="flex items-center justify-center px-8 py-8 sm:px-12 lg:col-span-7 lg:px-16 lg:py-12 xl:col-span-6"
     >
       <div className="max-w-xl lg:max-w-3xl">
-        <div className="relative -mt-16 block lg:hidden">
+        <div className="relative -mt-16 block lg:hidden pb-10">
           <a
             className="inline-flex size-16 items-center justify-center rounded-full bg-white text-blue-600 sm:size-20 dark:bg-gray-900"
             href="#"
@@ -66,12 +66,11 @@ export default function Page() {
           </a>
 
           <h1 className="mt-2 text-2xl font-bold text-gray-900 sm:text-3xl md:text-4xl dark:text-white">
-            Welcome to Squid 🦑
+            Welcome to AI Interviewer
           </h1>
 
           <p className="mt-4 leading-relaxed text-gray-500 dark:text-gray-400">
-            Lorem, ipsum dolor sit amet consectetur adipisicing elit. Eligendi nam dolorum aliquam,
-            quibusdam aperiam voluptatum.
+           Meet Your Future, Faster: Our AI Interviewer Transforms Job Screening with Real-Time Insights and Unbiased Precision – Start Your Journey with the Interviewer of Tomorrow!
           </p>
         </div>
 
