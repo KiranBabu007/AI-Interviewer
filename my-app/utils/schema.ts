@@ -22,3 +22,14 @@ export const UserAnswer = pgTable('userAnswer',{
     userEmail:varchar('userEmail'),
     createdAt:varchar('createdAt')
 })
+
+export const UserAnalysis = pgTable('userAnalysis',{
+    id:serial('id').primaryKey(),
+    mockIdRef:varchar('mockId').notNull(),
+    question:text('question'),
+    feedback:text('feedback'),
+    feedbacktype:text('feedbackType'),
+    rating:integer('rating'),
+    userEmail:varchar('userEmail'),
+    createdAt:varchar('createdAt')
+})
