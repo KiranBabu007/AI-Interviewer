@@ -90,6 +90,11 @@ const Navbar = ({
               <UserButton />
             </div>
           </div>
+          <div className="ml-auto mr-2 block md:hidden">
+            <div className="ml-4 flex items-center md:ml-6">
+              <UserButton />
+            </div>
+          </div>
           <div className="-mr-2 flex md:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
@@ -128,11 +133,7 @@ const Navbar = ({
                 </button>
               </>
             )}
-            <div className="block">
-            <div className="ml-4 flex items-center md:ml-6">
-              <UserButton />
-            </div>
-          </div>
+
           </div>
         </div>
       )}

@@ -40,7 +40,7 @@ const Page = () => {
         <div className="absolute pointer-events-none inset-0 flex dark:bg-black bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
         
      
-        <div className="w-[100%] md:w-2/3 py-8 px-20 justify-start flex flex-col">
+        <div className="w-[100] md:w-2/3 py-8 px-10 md:px-20 justify-start flex flex-col">
           <p className="text-3xl sm:text-5xl font-bold relative z-20 bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-500">
             Welcome to AI-Interviewer
           </p>
@@ -53,7 +53,7 @@ const Page = () => {
         </div>
 
         {/* Right Panel - Instructions */}
-        <div className="w-[100%] md:w-1/2 py-8 px-20 relative z-20 text-white">
+        <div className="w-[100%] md:w-1/2 py-8 px-10 md:px-20 relative z-20 text-white">
           <h2 className="text-2xl font-bold mb-6">Getting Started</h2>
           
           {/* Permissions */}
@@ -83,7 +83,7 @@ const Page = () => {
           </div>
 
           
-          <div className="space-y-4 bg-white p-8 rounded-lg bg-opacity-20">
+          <div className="space-y-4 bg-white p-5 md:p-8 rounded-lg bg-opacity-20">
             <h3 className="text-xl mb-4">Interview Guidelines</h3>
             <ul className="list-disc list-inside space-y-2 text-gray-300">
               <li>Ensure you&apos;re in a quiet environment</li>

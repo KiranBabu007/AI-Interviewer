@@ -18,9 +18,9 @@ export async function POST(request: Request) {
 
         let inputPrompt = '';
         if (interviewType === 'technical') {
-            inputPrompt = `Role: ${role}, Experience Level: ${experience}. Generate 1 technical interview question appropriate for this role and experience level, along with small answer.Answers should be one paragraph. Provide the response in JSON format as an array of objects with 'question' and 'answer' fields: [{'question':'...','answer':'...'}] Note : Don't ask to write program code`;
+            inputPrompt = `Role: ${role}, Experience Level: ${experience}. Generate 1 technical interview question appropriate for this role and experience level, along with small answer from question bank ${Math.floor(Math.random() * 100000) + 1}.Answers should be one paragraph. Provide the response in JSON format as an array of objects with 'question' and 'answer' fields: [{'question':'...','answer':'...'}] Note : Don't ask to write program code`;
         } else {
-            inputPrompt = `Experience Level: ${experience}. Generate 1 HR interview question appropriate for this experience level, along with detailed sample small answer. Provide the response in JSON format as an array of objects with 'question' and 'answer' fields: [{'question':'...','answer':'...'}]`;
+            inputPrompt = `Experience Level: ${experience}. Generate 1 HR interview question appropriate for this experience level, along with detailed sample small answer from question bank ${Math.floor(Math.random() * 100000) + 1}. Provide the response in JSON format as an array of objects with 'question' and 'answer' fields: [{'question':'...','answer':'...'}]`;
         }
 
         const result = await chatSession.sendMessage(inputPrompt);

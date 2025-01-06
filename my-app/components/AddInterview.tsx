@@ -102,7 +102,7 @@ const AddInterview = () => {
                     className={`w-1/2  flex items-center justify-center gap-2 transition-colors duration-300 
                       ${interviewType === 'hr' ? 'text-white' : 'text-black'}`}
                   >
-                    <Users className="w-4 h-4" /> 
+                    <Users className="w-4 h-4" />
                     HR
                   </button>
                 </div>
