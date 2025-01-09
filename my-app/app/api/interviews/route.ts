@@ -70,7 +70,7 @@ export async function GET() {
             .select()
             .from(MockInterview)
             .where(eq(MockInterview.createdBy, user.emailAddresses[0].emailAddress))
-            .orderBy(desc(MockInterview.id));
+            .orderBy(desc(MockInterview.id)).limit(2);
         return Response.json(interviews);
     } catch (error) {
         console.error('Error fetching interviews:', error);

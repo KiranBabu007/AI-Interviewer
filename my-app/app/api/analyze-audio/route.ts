@@ -33,7 +33,10 @@ export async function POST(request: Request) {
       `Return only JSON: {
         "contentAnalysis": "string",
         "communicationStyle": "string",
+        "communication": number,
+        "knowledge": number,
         "professionalDemeanor": "string",
+        "profDemeanor": number,
         "areasForImprovement": "string",
         "rating": number,
         "overallFeedback": "string"
@@ -57,25 +60,25 @@ export async function POST(request: Request) {
     
     const analysis = JSON.parse(analysisJson);
 
-    // Prepare the feedback string combining all analysis aspects
-    const detailedFeedback = `
-Content Analysis: ${analysis.contentAnalysis}
+    // Store feedback as structured JSON instead of a string
+    const structuredFeedback = {
+      contentAnalysis: analysis.contentAnalysis,
+      communicationStyle: analysis.communicationStyle,
+      communication: analysis.communication,
+      knowledge: analysis.knowledge,
+      professionalDemeanor: analysis.professionalDemeanor,
+      profDemeanor: analysis.profDemeanor,
+      areasForImprovement: analysis.areasForImprovement,
+      rating: analysis.rating,
+      overallFeedback: analysis.overallFeedback
+    };
 
-Communication Style: ${analysis.communicationStyle}
-
-Professional Demeanor: ${analysis.professionalDemeanor}
-
-Areas for Improvement: ${analysis.areasForImprovement}
-
-Overall Feedback: ${analysis.overallFeedback}
-    `.trim();
-
-    // Insert data into UserAnalysis table
+    // Insert data into UserAnalysis table with JSON feedback
     await db.insert(UserAnalysis).values({
       mockIdRef: mockId,
       question: question,
-      feedback: detailedFeedback,
-      feedbacktype: 'audio', // Adding a type to distinguish audio analysis
+      feedback: JSON.stringify(structuredFeedback), // Store as JSON string
+      feedbacktype: 'audio',
       rating: analysis.rating,
       userEmail: userEmail,
       createdAt: moment().format("DD-MM-YYYY")
@@ -94,12 +97,3 @@ Overall Feedback: ${analysis.overallFeedback}
     }, { status: 500 });
   }
 }
-
-// Increase payload limit for audio files
-// export const config = {
-//   api: {
-//     bodyParser: {
-//       sizeLimit: '10mb'
-//     }
-//   }
-// };

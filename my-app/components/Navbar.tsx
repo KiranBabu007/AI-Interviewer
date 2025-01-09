@@ -1,10 +1,11 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useState } from 'react';
-import { usePathname } from 'next/navigation'; 
-import { UserButton } from '@clerk/nextjs';
-import { Menu, X } from 'lucide-react';
+import Link from "next/link";
+import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { UserButton } from "@clerk/nextjs";
+import { Menu, X, User } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const Navbar = ({
   onAboutClick,
@@ -14,16 +15,16 @@ const Navbar = ({
   onHowItWorksClick?: () => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const pathname = usePathname(); 
-
-  const isHomePage = pathname === '/Home'; 
+  const pathname = usePathname();
+  const router = useRouter();
+  const isHomePage = pathname === "/Home";
 
   return (
     <nav className="bg-black text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 z-50">
               <Link href="/">
                 <svg
                   className="h-8 w-8"
@@ -54,7 +55,6 @@ const Navbar = ({
                   />
                 </svg>
               </Link>
-              
             </div>
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-4 font-bold">
@@ -81,13 +81,20 @@ const Navbar = ({
                     </button>
                   </>
                 )}
-                
               </div>
             </div>
           </div>
           <div className="hidden md:block">
             <div className="ml-4 flex items-center md:ml-6">
-              <UserButton />
+              <UserButton>
+                <UserButton.MenuItems>
+                  <UserButton.Action
+                    label="User Dashboard"
+                    labelIcon={<User size={18} color="white" />}
+                    onClick={() => router.push("/profile")}
+                  />
+                </UserButton.MenuItems>
+              </UserButton>
             </div>
           </div>
           <div className="ml-auto mr-2 block md:hidden">
@@ -101,7 +108,11 @@ const Navbar = ({
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:bg-gray-700 focus:text-white"
             >
               <span className="sr-only">Open main menu</span>
-              {isOpen ? <X className="block h-6 w-6" /> : <Menu className="block h-6 w-6" />}
+              {isOpen ? (
+                <X className="block h-6 w-6" />
+              ) : (
+                <Menu className="block h-6 w-6" />
+              )}
             </button>
           </div>
         </div>
@@ -133,7 +144,6 @@ const Navbar = ({
                 </button>
               </>
             )}
-
           </div>
         </div>
       )}
