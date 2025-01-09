@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { useParams, useRouter } from 'next/navigation';
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RadarChartComponent } from "@/components/RadarChartComponent"; // Import the radar chart component
 
 interface FeedbackItem {
   question: string;
@@ -87,6 +88,7 @@ const Feedback: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         className="max-w-4xl mx-auto space-y-6"
       >
+        {/* Heading and Subheadings */}
         <div className="space-y-2">
           <motion.h1 
             initial={{ opacity: 0 }}
@@ -101,6 +103,10 @@ const Feedback: React.FC = () => {
           </p>
         </div>
 
+        {/* Radar Chart at the Top */}
+        <RadarChartComponent />
+
+        {/* Text Analysis Section */}
         {feedbackList.length === 0 ? (
           <Card className="bg-gray-900/50 border-gray-800">
             <CardContent className="p-6">
@@ -149,10 +155,11 @@ const Feedback: React.FC = () => {
           </AnimatePresence>
         )}
 
+        {/* Return to Dashboard Button */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
+          transition={{ delay: 0.8 }}
         >
           <Button 
             onClick={() => router.replace('/dashboard')}
