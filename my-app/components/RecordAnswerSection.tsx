@@ -1,3 +1,4 @@
+"use client"
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
@@ -17,14 +18,7 @@ interface RecordAnswerSectionProps {
   activeQuestionIndex: number;
   interviewData: InterviewData | null;
 }
-interface InterviewAnalysis {
-  contentAnalysis: string;
-  communicationStyle: string;
-  professionalDemeanor: string;
-  areasForImprovement: string;
-  rating: number;
-  overallFeedback: string;
-}
+
 const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({ 
   mockInterviewQuestion, 
   activeQuestionIndex, 
@@ -35,8 +29,6 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({
   const { user } = useUser();
   const [audioURL, setAudioURL] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [analysis, setAnalysis] = useState<InterviewAnalysis | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
@@ -69,7 +61,6 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({
           audioChunksRef.current.push(event.data);
         }
       };
-
       mediaRecorderRef.current.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/mp3' });
         const audioUrl = URL.createObjectURL(audioBlob);
@@ -93,7 +84,7 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({
   };
 
   const analyzeAudio = async (audioBlob: Blob) => {
-    setIsAnalyzing(true);
+    
     try {
       const formData = new FormData();
       formData.append('audio', audioBlob);
@@ -109,13 +100,11 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({
       if (!response.ok) {
         throw new Error('Failed to analyze audio');
       }
-
-      const data = await response.json();
-      setAnalysis(data.analysis);
+      
     } catch (error) {
       console.error('Error analyzing audio:', error);
     } finally {
-      setIsAnalyzing(false);
+      setResults([]);
     }
   };
 
@@ -270,54 +259,6 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({
           </div>
         </CardContent>
       </Card>
-
-      {/* Analysis Results */}
-      {(isAnalyzing || analysis) && (
-        <Card className="w-full max-w-2xl mt-4">
-          <CardContent className="pt-3">
-            <h3 className="font-semibold mb-2">Interview Analysis</h3>
-            
-            {isAnalyzing ? (
-              <div className="flex items-center justify-center py-4">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                <span className="ml-2">Analyzing your response...</span>
-              </div>
-            ) : analysis && (
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-medium">Content Analysis</h4>
-                  <p className="text-gray-700">{analysis.contentAnalysis}</p>
-                </div>
-                
-                <div>
-                  <h4 className="font-medium">Communication Style</h4>
-                  <p className="text-gray-700">{analysis.communicationStyle}</p>
-                </div>
-                
-                <div>
-                  <h4 className="font-medium">Professional Demeanor</h4>
-                  <p className="text-gray-700">{analysis.professionalDemeanor}</p>
-                </div>
-                
-                <div>
-                  <h4 className="font-medium">Areas for Improvement</h4>
-                  <p className="text-gray-700">{analysis.areasForImprovement}</p>
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h4 className="font-medium">Overall Rating</h4>
-                    <p className="text-2xl font-bold text-primary">{analysis.rating}/10</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium text-gray-700">{analysis.overallFeedback}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 };

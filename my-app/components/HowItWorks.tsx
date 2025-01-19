@@ -11,7 +11,7 @@ const content = [
       "Start by selecting between Technical or HR interview modes. For technical interviews, specify your role (e.g., Developer, Designer) and experience level. HR interviews focus on soft skills and general competencies.",
     content: (
       <div className="h-full w-full bg-[linear-gradient(to_bottom_right,var(--purple-500),var(--blue-500))] flex items-center justify-center text-white">
-        <Image src="/intselect.png" width={500} height={400} alt="" />
+        <Image src="/intselect.png" width={400} height={400} alt="" />
       </div>
     ),
   },
@@ -41,7 +41,7 @@ const content = [
       "Your responses are recorded and analyzed in real-time. Our AI evaluates your communication skills, technical knowledge, and professional competencies throughout the interview session.",
     content: (
       <div className="h-full w-full bg-[linear-gradient(to_bottom_right,var(--orange-500),var(--yellow-500))] flex items-center justify-center text-white">
-        Webcam
+        <Image src="/webcam.png" width={400} height={400} alt="" className="rounded-lg"/>
       </div>
     ),
   },
@@ -51,7 +51,7 @@ const content = [
       "Receive a detailed evaluation report immediately after your interview. Get insights on your strengths, areas for improvement, and specific recommendations to enhance your interview performance.",
     content: (
       <div className="h-full w-full bg-[linear-gradient(to_bottom_right,var(--red-500),var(--pink-500))] flex items-center justify-center text-white">
-        Report
+        <Image src="/report.jpg" width={400} height={400} alt="" className="rounded-lg"/>
       </div>
     ),
   }

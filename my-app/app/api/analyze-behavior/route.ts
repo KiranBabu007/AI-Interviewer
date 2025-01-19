@@ -48,7 +48,10 @@ export async function POST(request: Request) {
       `5. Overall confidence score (1-10)\n` +
       `Return only JSON: {
         "postureAnalysis": "string",
+        "posture": number,
         "facialExpressions": "string",
+        "fexpressions": number,
+        "profDemeanor": number,
         "bodyLanguage": "string",
         "recommendations": "string",
         "confidenceScore": number,
@@ -68,23 +71,23 @@ export async function POST(request: Request) {
     
     const analysis = JSON.parse(analysisJson);
 
-    // Prepare the feedback string combining all analysis aspects
-    const detailedFeedback = `
-Posture Analysis: ${analysis.postureAnalysis}
+    // Store feedback as structured JSON
+    const structuredFeedback = {
+      postureAnalysis: analysis.postureAnalysis,
+      posture: analysis.posture,
+      facialExpressions: analysis.facialExpressions,
+      fexpressions: analysis.fexpressions,
+      bodyLanguage: analysis.bodyLanguage,
+      profDemeanor: analysis.profDemeanor,
+      recommendations: analysis.recommendations,
+      confidenceScore: analysis.confidenceScore,
+      overallImpression: analysis.overallImpression
+    };
 
-Facial Expressions: ${analysis.facialExpressions}
-
-Body Language: ${analysis.bodyLanguage}
-
-Recommendations: ${analysis.recommendations}
-
-Overall Impression: ${analysis.overallImpression}
-    `.trim();
-
-    // Insert data into UserAnalysis table
+    // Insert data into UserAnalysis table with JSON feedback
     await db.insert(UserAnalysis).values({
       mockIdRef: mockId,
-      feedback: detailedFeedback,
+      feedback: JSON.stringify(structuredFeedback),
       feedbacktype: 'behavior',
       rating: analysis.confidenceScore,
       userEmail: userEmail,
@@ -104,12 +107,3 @@ Overall Impression: ${analysis.overallImpression}
     }, { status: 500 });
   }
 }
-
-// Increase payload limit for image files
-// export const config = {
-//   api: {
-//     bodyParser: {
-//       sizeLimit: '10mb'
-//     }
-//   }
-// };

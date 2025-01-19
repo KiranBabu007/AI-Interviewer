@@ -131,9 +131,9 @@ const AddInterview = () => {
                       <SelectValue placeholder="Select experience" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="junior">Junior</SelectItem>
-                      <SelectItem value="mid">Mid</SelectItem>
-                      <SelectItem value="senior">Senior</SelectItem>
+                      <SelectItem value="junior">Junior (0-2)</SelectItem>
+                      <SelectItem value="mid">Mid (2–5)</SelectItem>
+                      <SelectItem value="senior">Senior (5+)</SelectItem>
                     </SelectContent>
                   </Select>
                 </>
@@ -147,9 +147,9 @@ const AddInterview = () => {
                       <SelectValue placeholder="Select experience" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="junior">Junior</SelectItem>
-                      <SelectItem value="mid">Mid</SelectItem>
-                      <SelectItem value="senior">Senior</SelectItem>
+                      <SelectItem value="junior">Junior (0-2)</SelectItem>
+                      <SelectItem value="mid">Mid (2–5)</SelectItem>
+                      <SelectItem value="senior">Senior (5+)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
