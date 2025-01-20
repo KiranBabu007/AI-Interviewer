@@ -42,7 +42,15 @@ const AddInterview = () => {
 
       const response = await fetch('/api/interviews', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          interviewType,
+          role,
+          experience
+        })
+        
       });
 
       const data = await response.json();
