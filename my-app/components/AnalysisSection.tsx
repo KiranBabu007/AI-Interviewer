@@ -112,7 +112,11 @@ const AnalysisSection = ({ interviewId }: { interviewId: string | string[] }) =>
         <Button
           variant={activeTab === 'audio' ? 'default' : 'outline'}
           onClick={() => setActiveTab('audio')}
-          className="flex items-center gap-2"
+          className={`flex items-center gap-2 ${
+            activeTab === 'audio' 
+              ? 'bg-primary text-primary-foreground hover:bg-primary/90' 
+              : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+          }`}
         >
           <Mic className="h-4 w-4" />
           Audio Analysis
@@ -120,7 +124,11 @@ const AnalysisSection = ({ interviewId }: { interviewId: string | string[] }) =>
         <Button
           variant={activeTab === 'behavior' ? 'default' : 'outline'}
           onClick={() => setActiveTab('behavior')}
-          className="flex items-center gap-2"
+          className={`flex items-center gap-2 ${
+            activeTab === 'behavior'
+              ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+              : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+          }`}
         >
           <Video className="h-4 w-4" />
           Behavioral Analysis
