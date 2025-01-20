@@ -34,31 +34,21 @@ const AddInterview = () => {
     try {
       const formData = new FormData();
       formData.append('interviewType', interviewType);
-      formData.append('role', role);
-      formData.append('experience', experience);
-      if (resume) {
-        formData.append('resume', resume); // Append resume file if it exists
-      }
-
+      if (role) formData.append('role', role);
+      if (experience) formData.append('experience', experience);
+      if (resume) formData.append('resume', resume);
+  
       const response = await fetch('/api/interviews', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          interviewType,
-          role,
-          experience
-        })
-        
+        body: formData // Remove the Content-Type header to let the browser set it
       });
-
+  
       const data = await response.json();
-
+  
       if (!response.ok) {
         throw new Error(data.error || 'Something went wrong');
       }
-
+  
       setOpen(false);
       router.push('/dashboard/interview/' + data.mockId);
     } catch (error) {
