@@ -8,7 +8,12 @@ import { desc, eq } from "drizzle-orm";
 
 export async function POST(request: Request) {
     try {
-        const { interviewType, role, experience } = await request.json();
+        const formData = await request.formData();
+        const interviewType = formData.get('interviewType') as string;
+        const role = formData.get('role') as string;
+        const experience = formData.get('experience') as string;
+        const resumeFile = formData.get('resume') as File;
+
         const { userId } = await auth();
         const user = await currentUser();
 
@@ -16,20 +21,41 @@ export async function POST(request: Request) {
             return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        let inputPrompt = '';
-        if (interviewType === 'technical') {
-            inputPrompt = `Role: ${role}, Experience Level: ${experience}. Generate 1 technical interview question appropriate for this role and experience level, along with small answer from question bank ${Math.floor(Math.random() * 100000) + 1}.Answers should be one paragraph. Provide the response in JSON format as an array of objects with 'question' and 'answer' fields: [{'question':'...','answer':'...'}] Note : Don't ask to write program code`;
+        let cleanedResponse;
+        
+        if (interviewType === 'resume' && resumeFile) {
+            // Convert the uploaded file to ArrayBuffer and then to base64
+            const arrayBuffer = await resumeFile.arrayBuffer();
+            const base64Pdf = Buffer.from(arrayBuffer).toString("base64");
+            
+            // Create the prompt for resume analysis
+            const resumePrompt = {
+                inlineData: {
+                    data: base64Pdf,
+                    mimeType: "application/pdf"
+                }
+            };
+
+            // Send both the PDF data and the instruction prompt
+            const result = await chatSession.sendMessage([
+                resumePrompt,
+                'Based on this resume, generate 2 relevant interview questions and their sample answers that assess the candidate\'s experience and skills. Format the response as a JSON array: [{"question":"...","answer":"..."},{"question":"...","answer":"..."}]'
+            ]);
+
+            cleanedResponse = result.response.text().replace(/```json\n?|\n?```/g, '');
         } else {
-            inputPrompt = `Experience Level: ${experience}. Generate 1 HR interview question appropriate for this experience level, along with detailed sample small answer from question bank ${Math.floor(Math.random() * 100000) + 1}. Provide the response in JSON format as an array of objects with 'question' and 'answer' fields: [{'question':'...','answer':'...'}]`;
+            let inputPrompt = '';
+            if (interviewType === 'technical') {
+                inputPrompt = `Role: ${role}, Experience Level: ${experience}. Generate 1 technical interview question appropriate for this role and experience level, along with small answer from question bank ${Math.floor(Math.random() * 100000) + 1}.Answers should be one paragraph. Provide the response in JSON format as an array of objects with 'question' and 'answer' fields: [{'question':'...','answer':'...'}] Note : Don't ask to write program code`;
+            } else {
+                inputPrompt = `Experience Level: ${experience}. Generate 1 HR interview question appropriate for this experience level, along with detailed sample small answer from question bank ${Math.floor(Math.random() * 100000) + 1}. Provide the response in JSON format as an array of objects with 'question' and 'answer' fields: [{'question':'...','answer':'...'}]`;
+            }
+
+            const result = await chatSession.sendMessage(inputPrompt);
+            cleanedResponse = result.response.text().replace(/```json\n?|\n?```/g, '');
         }
 
-        const result = await chatSession.sendMessage(inputPrompt);
-        const MockJsonResp = result.response.text();
-
-        const cleanedResponse = MockJsonResp.replace(/```json\n?|\n?```/g, '');
-
-
-        if (!result) {
+        if (!cleanedResponse) {
             return Response.json({ error: 'Failed to generate interview questions' }, { status: 500 });
         }
 
@@ -38,7 +64,7 @@ export async function POST(request: Request) {
         const insertData = {
             mockId: newMockId,
             jsonMockResp: cleanedResponse,
-            jobPosition: role || 'HR Interview',
+            jobPosition: role || (interviewType === 'resume' ? 'Resume Interview' : 'HR Interview'),
             jobType: interviewType,
             jobExperience: experience,
             createdBy: user.emailAddresses[0].emailAddress,
@@ -70,7 +96,8 @@ export async function GET() {
             .select()
             .from(MockInterview)
             .where(eq(MockInterview.createdBy, user.emailAddresses[0].emailAddress))
-            .orderBy(desc(MockInterview.id)).limit(2);
+            .orderBy(desc(MockInterview.id))
+            .limit(2);
         return Response.json(interviews);
     } catch (error) {
         console.error('Error fetching interviews:', error);
