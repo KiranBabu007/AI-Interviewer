@@ -168,7 +168,7 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({
   }, [isRecording, userAnswer, UpdateUserAnswer]);
 
   const StartStopRecording = async () => {
-    if (isRecording) {
+    if (isRecording) { 
       stopSpeechToText();
       stopAudioRecording();
     } else {
