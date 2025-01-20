@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "db:push": "npx drizzle-kit push",
-    "db:studio": "npx drizzle-kit studio"
+    "db:studio": "npx drizzle-kit studio",
+    "generate-migration": "drizzle-kit generate:pg",
+    "apply-migration": "drizzle-kit migrate:pg"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.9.2",

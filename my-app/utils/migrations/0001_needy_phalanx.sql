@@ -1,0 +1,1 @@
+ALTER TABLE "MockInterview" ALTER COLUMN "jobPosition" SET NOT NULL;
