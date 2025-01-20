@@ -27,7 +27,6 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
-  const [interimResult, setInterimResult] = useState<string>("");
   const { user } = useUser();
   const [audioURL, setAudioURL] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
