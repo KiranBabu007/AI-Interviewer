@@ -4,8 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import Webcam from 'react-webcam';
-import useSpeechToText from 'react-hook-speech-to-text';
-import { Mic, StopCircle, Play, Pause } from 'lucide-react';
+import { Mic, StopCircle, Play, Pause, Loader2 } from 'lucide-react';
 import { useUser } from '@clerk/nextjs';
 
 interface InterviewData {
@@ -26,29 +25,15 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({
 }) => {
   const [userAnswer, setUserAnswer] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [interimResult, setInterimResult] = useState<string>("");
   const { user } = useUser();
   const [audioURL, setAudioURL] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
-
-  const {
-    error,
-    interimResult,
-    isRecording,
-    results,
-    startSpeechToText,
-    stopSpeechToText,
-    setResults
-  } = useSpeechToText({
-    continuous: true,
-    useLegacyResults: false
-  });
-
-  const completeTranscript = results.map(result => 
-    typeof result === 'string' ? result : result.transcript
-  ).join(' ');
 
   const startAudioRecording = async () => {
     try {
@@ -61,16 +46,18 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({
           audioChunksRef.current.push(event.data);
         }
       };
+
       mediaRecorderRef.current.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/mp3' });
         const audioUrl = URL.createObjectURL(audioBlob);
         setAudioURL(audioUrl);
         
-        // Send audio for analysis
-        await analyzeAudio(audioBlob);
+        // Send to Groq API for transcription
+        await transcribeAudio(audioBlob);
       };
 
       mediaRecorderRef.current.start();
+      setIsRecording(true);
     } catch (err) {
       console.error('Error accessing microphone:', err);
     }
@@ -80,11 +67,40 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
       mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      setIsRecording(false);
+    }
+  };
+
+  const transcribeAudio = async (audioBlob: Blob) => {
+    setIsTranscribing(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', audioBlob);
+      formData.append('model', 'whisper-large-v3');
+      formData.append('language', 'en');
+      
+      const response = await fetch('/api/transcribe', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Transcription failed');
+      }
+
+      const data = await response.json();
+      setUserAnswer(data.text);
+      
+      // After transcription, analyze the audio
+      await analyzeAudio(audioBlob);
+    } catch (error) {
+      console.error('Error transcribing audio:', error);
+    } finally {
+      setIsTranscribing(false);
     }
   };
 
   const analyzeAudio = async (audioBlob: Blob) => {
-    
     try {
       const formData = new FormData();
       formData.append('audio', audioBlob);
@@ -100,11 +116,8 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({
       if (!response.ok) {
         throw new Error('Failed to analyze audio');
       }
-      
     } catch (error) {
       console.error('Error analyzing audio:', error);
-    } finally {
-      setResults([]);
     }
   };
 
@@ -145,7 +158,6 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({
     } catch (error) {
       console.error('Error saving answer:', error);
     } finally {
-      setResults([]);
       setLoading(false);
     }
   }, [
@@ -153,13 +165,8 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({
     activeQuestionIndex, 
     interviewData, 
     userAnswer, 
-    user?.primaryEmailAddress?.emailAddress, 
-    setResults
+    user?.primaryEmailAddress?.emailAddress
   ]);
-
-  useEffect(() => {
-    setUserAnswer(completeTranscript);
-  }, [completeTranscript]);
 
   useEffect(() => {
     if (!isRecording && userAnswer.length > 10) {
@@ -169,10 +176,8 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({
 
   const StartStopRecording = async () => {
     if (isRecording) {
-      stopSpeechToText();
       stopAudioRecording();
     } else {
-      startSpeechToText();
       startAudioRecording();
     }
   };
@@ -188,16 +193,6 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({
     }
   }, []);
 
-  if (error) {
-    return (
-      <Card className="w-full max-w-2xl p-6">
-        <CardContent>
-          <p className="text-red-500">Web Speech API is not available in this browser 🤷‍</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <div className='flex flex-col justify-center items-center'>
       <div className='flex flex-col justify-center items-center rounded-lg bg-black'>
@@ -206,7 +201,7 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({
       </div>
       
       <div className="flex gap-2 my-3">
-        <Button disabled={loading} variant="outline" onClick={StartStopRecording}>
+        <Button disabled={loading || isTranscribing} variant="outline" onClick={StartStopRecording}>
           {isRecording ? (
             <h2 className="text-red-600 items-center animate-pulse flex gap-2">
               <StopCircle /> Stop Recording...
@@ -244,15 +239,18 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({
                   Recording in progress...
                 </span>
               )}
+              {isTranscribing && (
+                <span className="text-sm text-blue-500 flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Transcribing...
+                </span>
+              )}
             </div>
             <div className="text-gray-700 min-h-[100px] whitespace-pre-wrap">
-              {completeTranscript}
-              {interimResult && (
-                <span className="text-gray-500 italic"> {interimResult}</span>
-              )}
-              {!completeTranscript && !interimResult && (
+              {userAnswer}
+              {!userAnswer && !isRecording && !isTranscribing && (
                 <span className="text-gray-400">
-                  Start speaking to see your answer appear here...
+                  Start recording to see your answer appear here...
                 </span>
               )}
             </div>
