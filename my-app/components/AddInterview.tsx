@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { PlusCircle, Code2, Users, PlayCircle, LoaderCircle, File } from 'lucide-react'
+import { PlusCircle, Code2, Users, PlayCircle, LoaderCircle, File, X } from 'lucide-react'
 import { useRouter } from "next/navigation"
 
 const AddInterview = () => {
@@ -65,6 +65,14 @@ const AddInterview = () => {
     const file = event.target.files[0];
     if (file) {
       setResume(file); // Set the selected file to the resume state
+    }
+  };
+
+  const handleRemoveResume = () => {
+    setResume(null); // Clear the resume state
+    const fileInput = document.getElementById('resume') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = ''; // Reset the file input
     }
   };
 
@@ -186,6 +194,14 @@ const AddInterview = () => {
                       <File className="w-5 h-5" />
                       {resume ? resume.name : "Choose File"}
                     </label>
+                    {resume && (
+                      <button
+                        onClick={handleRemoveResume}
+                        className="p-1 text-gray-500 hover:text-gray-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
