@@ -25,7 +25,7 @@ const AddInterview = () => {
   const [interviewType, setInterviewType] = useState("technical"); // Default to "technical"
   const [role, setRole] = useState("");
   const [experience, setExperience] = useState("");
-  const [resume, setResume] = useState(null); // State for resume file
+  const [resume, setResume] = useState<File | null>(null); // State for resume file
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
