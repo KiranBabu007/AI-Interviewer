@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Mic, Video, BadgeCheck, AlertCircle } from 'lucide-react';
+import { Mic, Video, BadgeCheck, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface AnalysisData {
   feedbacktype: string;
   feedback: string;
   rating: number;
+  question?: string;
 }
 
 interface ParsedAudioFeedback {
@@ -40,6 +41,7 @@ const AnalysisSection = ({ interviewId }: { interviewId: string | string[] }) =>
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'audio' | 'behavior'>('audio');
+  const [currentAudioIndex, setCurrentAudioIndex] = useState(0);
 
   useEffect(() => {
     const fetchAnalysis = async () => {
@@ -54,12 +56,23 @@ const AnalysisSection = ({ interviewId }: { interviewId: string | string[] }) =>
         setLoading(false);
       }
     };
-
     fetchAnalysis();
   }, [interviewId]);
 
-  const audioAnalysis = analysisData.find(item => item.feedbacktype === 'audio');
+  const audioAnalyses = analysisData.filter(item => item.feedbacktype === 'audio');
   const behaviorAnalysis = analysisData.find(item => item.feedbacktype === 'behavior');
+
+  const handlePrevAudio = () => {
+    setCurrentAudioIndex((prev) => 
+      prev === 0 ? audioAnalyses.length - 1 : prev - 1
+    );
+  };
+
+  const handleNextAudio = () => {
+    setCurrentAudioIndex((prev) => 
+      prev === audioAnalyses.length - 1 ? 0 : prev + 1
+    );
+  };
 
   const parseAudioFeedback = (feedback: string): ParsedAudioFeedback => {
     try {
@@ -78,6 +91,76 @@ const AnalysisSection = ({ interviewId }: { interviewId: string | string[] }) =>
       return {} as ParsedBehaviorFeedback;
     }
   };
+
+  const AudioFeedbackCard = ({ analysis }: { analysis: AnalysisData }) => {
+    const feedback = parseAudioFeedback(analysis.feedback);
+    return (
+      <Card className="bg-gray-900/50 border-gray-800">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-gray-100">
+            <BadgeCheck className="h-5 w-5 text-green-500" />
+            <div className="flex-1">
+              Question {currentAudioIndex + 1} of {audioAnalyses.length}:
+              <div className="text-sm font-normal mt-1 text-gray-300">
+                {analysis.question || 'No question provided'}
+              </div>
+            </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <ScoreCard
+              title="Communication Score"
+              score={feedback.communication}
+              details={feedback.communicationStyle}
+            />
+            <ScoreCard
+              title="Knowledge Score"
+              score={feedback.knowledge}
+              details={feedback.contentAnalysis}
+            />
+            <ScoreCard
+              title="Professional Demeanor"
+              score={feedback.profDemeanor}
+              details={feedback.professionalDemeanor}
+            />
+          </div>
+          <FeedbackSection
+            title="Areas for Improvement"
+            content={feedback.areasForImprovement}
+          />
+          <FeedbackSection
+            title="Overall Feedback"
+            content={feedback.overallFeedback}
+          />
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const AudioNavigation = () => (
+    <div className="flex justify-center items-center gap-4 mb-4 ">
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={handlePrevAudio}
+        className="h-10 w-10 rounded-full bg-gray-800/50 border-gray-700 hover:bg-gray-700/50"
+      >
+        <ChevronLeft className="h-5 w-5" />
+      </Button>
+      <span className="text-sm text-gray-400">
+        {currentAudioIndex + 1} / {audioAnalyses.length}
+      </span>
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={handleNextAudio}
+        className="h-10 w-10 rounded-full bg-gray-800/50 border-gray-700 hover:bg-gray-700/50"
+      >
+        <ChevronRight className="h-5 w-5" />
+      </Button>
+    </div>
+  );
 
   if (loading) {
     return (
@@ -137,49 +220,11 @@ const AnalysisSection = ({ interviewId }: { interviewId: string | string[] }) =>
 
       <div className="mt-4">
         {activeTab === 'audio' ? (
-          audioAnalysis ? (
-            <Card className="bg-gray-900/50 border-gray-800">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BadgeCheck className="h-5 w-5 text-green-500" />
-                  Voice & Communication Analysis
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {(() => {
-                  const feedback = parseAudioFeedback(audioAnalysis.feedback);
-                  return (
-                    <>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <ScoreCard
-                          title="Communication Score"
-                          score={feedback.communication}
-                          details={feedback.communicationStyle}
-                        />
-                        <ScoreCard
-                          title="Knowledge Score"
-                          score={feedback.knowledge}
-                          details={feedback.contentAnalysis}
-                        />
-                        <ScoreCard
-                          title="Professional Demeanor"
-                          score={feedback.profDemeanor}
-                          details={feedback.professionalDemeanor}
-                        />
-                      </div>
-                      <FeedbackSection
-                        title="Areas for Improvement"
-                        content={feedback.areasForImprovement}
-                      />
-                      <FeedbackSection
-                        title="Overall Feedback"
-                        content={feedback.overallFeedback}
-                      />
-                    </>
-                  );
-                })()}
-              </CardContent>
-            </Card>
+          audioAnalyses.length > 0 ? (
+            <div>
+              <AudioNavigation />
+              <AudioFeedbackCard analysis={audioAnalyses[currentAudioIndex]} />
+            </div>
           ) : (
             <EmptyState type="audio" />
           )
@@ -187,7 +232,7 @@ const AnalysisSection = ({ interviewId }: { interviewId: string | string[] }) =>
           behaviorAnalysis ? (
             <Card className="bg-gray-900/50 border-gray-800">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-gray-100">
                   <BadgeCheck className="h-5 w-5 text-green-500" />
                   Body Language & Behavioral Analysis
                 </CardTitle>
