@@ -23,10 +23,10 @@ export async function POST(request: Request) {
     } = req;
 
 
-    const feedbackPrompt =
+    const feedbackPrompt = 
       `Rate this interview answer from 1-10 and provide one sentence of feedback. ` +
       `Question: "${mockInterviewQuestion[activeQuestionIndex]?.question}" ` +
-      `Answer: "${userAnswer}" ` +
+      `Answer: "${userAnswer}" ` + 
       `Return only JSON: {"rating": number, "feedback": "string"}`;
 
     const result = await chatSession.sendMessage(feedbackPrompt);
