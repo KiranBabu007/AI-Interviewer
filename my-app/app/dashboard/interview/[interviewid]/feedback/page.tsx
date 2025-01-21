@@ -47,6 +47,7 @@ const Feedback: React.FC = () => {
 
       const data = await response.json();
       setFeedbackList(data.feedbackList);
+      console.log(data)
     } catch (error: unknown) {
       console.error("Error fetching feedback:", error);
       setError(
