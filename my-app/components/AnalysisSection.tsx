@@ -46,7 +46,7 @@ const AnalysisSection = ({ interviewId }: { interviewId: string | string[] }) =>
   useEffect(() => {
     const fetchAnalysis = async () => {
       try {
-        const response = await fetch(`/api/analysis/${interviewId}`);
+        const response = await fetch(`/api/other-feedback/${interviewId}`);
         if (!response.ok) throw new Error('Failed to fetch analysis data');
         const data = await response.json();
         setAnalysisData(data.analysisData);

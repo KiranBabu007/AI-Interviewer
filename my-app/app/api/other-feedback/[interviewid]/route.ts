@@ -1,5 +1,4 @@
 // app/api/analysis/[interviewid]/route.ts
-
 import { db } from '@/utils/db';
 import { UserAnalysis } from '@/utils/schema';
 import { eq } from 'drizzle-orm';
