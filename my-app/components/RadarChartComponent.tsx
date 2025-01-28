@@ -43,7 +43,7 @@ export function RadarChartComponent() {
         setLoading(true);
         setError(null);
         
-        const response = await fetch(`/api/analysis/${interviewid}`);
+        const response = await fetch(`/api/other-feedback/${interviewid}`);
         if (!response.ok) {
           throw new Error('Failed to fetch analysis data');
         }
