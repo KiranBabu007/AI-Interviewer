@@ -164,7 +164,8 @@ const Page = () => {
     <div className="relative h-screen w-full bg-neutral-950 flex flex-col overflow-hidden">
       <BackgroundBeams className="absolute inset-0 z-0" />
       
-      <div className="relative flex-grow overflow-auto py-8 z-10">
+      {/* Add overflow-hidden and h-screen to the container to prevent scrolling */}
+      <div className="relative flex-grow overflow-hidden py-8 z-10 h-screen">
         <div className="container mx-auto px-4 h-full">
           <div className='grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 h-full'>
             <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-6 border border-white/5 shadow-xl h-full">
