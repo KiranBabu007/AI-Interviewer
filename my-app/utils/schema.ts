@@ -1,4 +1,5 @@
 import { integer, pgTable, serial, text, varchar } from "drizzle-orm/pg-core";
+import { Tags } from "lucide-react";
 
 export const MockInterview=pgTable('MockInterview',{
     id:serial('id').primaryKey(),
@@ -8,7 +9,10 @@ export const MockInterview=pgTable('MockInterview',{
     jobExperience:varchar('jobExperience'),
     createdBy:varchar('createdBy').notNull(),
     createdAt:varchar('createdAt'),
-    mockId:varchar('mockId').notNull()
+    mockId:varchar('mockId').notNull(),
+    totalRating:integer('totalRating'),
+    tags:varchar('Tags')
+    
 })
 
 export const UserAnswer = pgTable('userAnswer',{

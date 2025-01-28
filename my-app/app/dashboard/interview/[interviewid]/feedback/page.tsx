@@ -31,23 +31,22 @@ const Feedback: React.FC = () => {
   const GetFeedback = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `/api/interviews/${params.interviewid}/feedback`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
+      const response = await fetch('/api/feedback', {
+        method: "POST", //
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ interviewid: params.interviewid }), 
+      });
+  
       if (!response.ok) {
         throw new Error("Failed to fetch feedback");
       }
-
+  
       const data = await response.json();
       setFeedbackList(data.feedbackList);
-    } catch (error: unknown) {
+      console.log(data);
+    } catch (error) {
       console.error("Error fetching feedback:", error);
       setError(
         error instanceof Error ? error.message : "An unknown error occurred"

@@ -129,21 +129,22 @@ const Page = () => {
 
   const GetInterviewDetails = useCallback(async () => {
     try {
-      const response = await fetch(`/api/interviews/${interviewId}`, {
-        method: 'GET',
+      const response = await fetch('/api/get-answers', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ interviewId }), // Pass interviewId in the body
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to fetch interview details');
       }
-
+  
       const data = await response.json();
       setInterviewDetails(data.interviewData);
       setQuestions(data.mockInterviewQuestions);
-    } catch (error: unknown) {
+    } catch (error) {
       console.error('Error fetching interview details:', error);
     }
   }, [interviewId]);
@@ -164,7 +165,8 @@ const Page = () => {
     <div className="relative h-screen w-full bg-neutral-950 flex flex-col overflow-hidden">
       <BackgroundBeams className="absolute inset-0 z-0" />
       
-      <div className="relative flex-grow overflow-auto py-8 z-10">
+      {/* Add overflow-hidden and h-screen to the container to prevent scrolling */}
+      <div className="relative flex-grow overflow-hidden py-8 z-10 h-screen">
         <div className="container mx-auto px-4 h-full">
           <div className='grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 h-full'>
             <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-6 border border-white/5 shadow-xl h-full">
