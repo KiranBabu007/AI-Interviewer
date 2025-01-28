@@ -5,13 +5,13 @@ import { auth, currentUser } from '@clerk/nextjs/server';
 
 export async function POST(request: Request) {
     try {
-        // Authenticate the user
-        // const { userId } = await auth();
-        // const user = await currentUser();
+        
+        const { userId } = await auth();
+        const user = await currentUser();
 
-        // if (!userId || !user?.emailAddresses?.[0]?.emailAddress) {
-        //     return Response.json({ error: 'Unauthorized' }, { status: 401 });
-        // }
+        if (!userId || !user?.emailAddresses?.[0]?.emailAddress) {
+            return Response.json({ error: 'Unauthorized' }, { status: 401 });
+        }
 
         // Extract interviewId from the request body
         const { interviewId } = await request.json();
