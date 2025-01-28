@@ -129,7 +129,7 @@ const Page = () => {
 
   const GetInterviewDetails = useCallback(async () => {
     try {
-      const response = await fetch('/api/get-answers', {
+      const response = await fetch('/api/get-question', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
