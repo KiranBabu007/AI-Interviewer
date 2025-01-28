@@ -4,7 +4,7 @@ import { eq } from 'drizzle-orm';
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
-export async function GET(request: Request, { params }: { params: { interviewid: string } }) {
+export async function POST(request: Request) {
     try {
         const { userId } = await auth();
 
@@ -12,10 +12,17 @@ export async function GET(request: Request, { params }: { params: { interviewid:
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
+        // Extract interviewid from the request body
+        const { interviewid } = await request.json();
+
+        if (!interviewid) {
+            return NextResponse.json({ error: 'Interview ID is required' }, { status: 400 });
+        }
+
         // Fetch feedback data from UserAnswer table
         const result = await db.select()
             .from(UserAnswer)
-            .where(eq(UserAnswer.mockIdRef, params.interviewid))
+            .where(eq(UserAnswer.mockIdRef, interviewid))
             .orderBy(UserAnswer.id);
 
         if (result.length === 0) {
@@ -33,9 +40,9 @@ export async function GET(request: Request, { params }: { params: { interviewid:
         // Step 2: Update the totalRating in the MockInterview table
         await db.update(MockInterview)
             .set({ totalRating: averageRating })
-            .where(eq(MockInterview.mockId, params.interviewid));
+            .where(eq(MockInterview.mockId, interviewid));
 
-        console.log("Feedbackil keri")
+        console.log("Feedback retrieved and rating updated successfully");
         return NextResponse.json({
             message: 'Feedback retrieved and rating updated successfully',
             feedbackList: result,

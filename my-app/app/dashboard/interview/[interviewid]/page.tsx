@@ -129,21 +129,22 @@ const Page = () => {
 
   const GetInterviewDetails = useCallback(async () => {
     try {
-      const response = await fetch(`/api/interviews/${interviewId}`, {
-        method: 'GET',
+      const response = await fetch('/api/get-answers', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ interviewId }), // Pass interviewId in the body
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to fetch interview details');
       }
-
+  
       const data = await response.json();
       setInterviewDetails(data.interviewData);
       setQuestions(data.mockInterviewQuestions);
-    } catch (error: unknown) {
+    } catch (error) {
       console.error('Error fetching interview details:', error);
     }
   }, [interviewId]);
