@@ -168,7 +168,7 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({
   ]);
 
   useEffect(() => {
-    if (!isRecording && userAnswer.length > 10) {
+    if (!isRecording && userAnswer.length > 0) {
       UpdateUserAnswer();
     }
   }, [isRecording, userAnswer, UpdateUserAnswer]);

@@ -22,7 +22,6 @@ export async function POST(request: Request) {
       userAnswer 
     } = req;
 
-
     const feedbackPrompt = `
 Evaluate the quality of the following interview response based on relevance, accuracy, depth, and clarity. 
 
@@ -41,24 +40,24 @@ Question: "${mockInterviewQuestion[activeQuestionIndex]?.question}"
 Answer: "${userAnswer}"
 `;
 
-
     const result = await chatSession.sendMessage(feedbackPrompt);
     const mockJsonResp = (await result.response.text())
       .replace('```json','')
       .replace('```','');
     
     const JsonFeedbackResp = JSON.parse(mockJsonResp);
+    console.log(JsonFeedbackResp)
 
-    const nextQuestionPrompt = 
-      `You are conducting a ${interviewData.jobType.toLowerCase()} interview for a ${interviewData.jobExperience} ${interviewData.jobPosition} position. ` +
-      `Previous Q&A:\n` +
-      `Q: "${mockInterviewQuestion[activeQuestionIndex]?.question}"\n` +
-      `A: "${userAnswer}"\n` +
-      `Generate one follow back ${interviewData.jobType.toLowerCase()} interview question and small model answer. ` +
-      `For HR type, focus on behavioral and situational questions. ` +
-      `For Technical type, focus on technical concepts and problem-solving. ` +
-      `Return only JSON: {"question": "string", "answer": "string"}`;
-
+    // Get the next question
+    const nextQuestionPrompt = `
+      You are conducting a ${interviewData.jobType.toLowerCase()} interview for a ${interviewData.jobExperience} ${interviewData.jobPosition} position. 
+      Previous Q&A:\n
+      Q: "${mockInterviewQuestion[activeQuestionIndex]?.question}"\n
+      A: "${userAnswer}"\n
+      Generate one follow-up interview question and model answer.
+      Return only JSON: {"question": "string", "answer": "string"}
+    `;
+    
     const nextQuestionResult = await chatSession.sendMessage(nextQuestionPrompt);
     const nextQuestionJson = (await nextQuestionResult.response.text())
       .replace('```json','')
@@ -66,6 +65,7 @@ Answer: "${userAnswer}"
     
     const nextQuestion = JSON.parse(nextQuestionJson);
 
+    // Insert user answer data
     const insertData = {
       mockIdRef: interviewData.mockId,
       question: mockInterviewQuestion[activeQuestionIndex].question,
@@ -78,6 +78,7 @@ Answer: "${userAnswer}"
     };
     await db.insert(UserAnswer).values(insertData);
 
+    // Fetch existing mock interview data
     const currentMock = await db.select()
       .from(MockInterview)
       .where(eq(MockInterview.mockId, interviewData.mockId));
@@ -86,6 +87,37 @@ Answer: "${userAnswer}"
       throw new Error('Mock interview not found');
     }
 
+    // Parse existing tags from MockInterview table
+    let existingTags = {};
+    if (currentMock[0].tags) {
+      try {
+        existingTags = JSON.parse(currentMock[0].tags);
+      } catch (error) {
+        console.error('Error parsing tags:', error);
+        existingTags = {}; // Reset if parsing fails
+      }
+    }
+
+    // Merge new skills with existing tags and calculate average rating
+    const newTags = JsonFeedbackResp.tags || {};
+    for (const skill in newTags) {
+      if (existingTags[skill]) {
+        // Update the average rating for the skill
+        existingTags[skill] = Math.round((existingTags[skill] + newTags[skill]) / 2);
+      } else {
+        // Add new skill to tags
+        existingTags[skill] = newTags[skill];
+      }
+    }
+
+    // Update the MockInterview table with new or updated tags
+    await db.update(MockInterview)
+      .set({
+        tags: JSON.stringify(existingTags)
+      })
+      .where(eq(MockInterview.mockId, interviewData.mockId));
+
+    // Append the next question to the MockInterview record
     const currentQuestions = JSON.parse(currentMock[0].jsonMockResp);
     currentQuestions.push(nextQuestion);
 
