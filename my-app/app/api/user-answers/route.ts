@@ -23,11 +23,24 @@ export async function POST(request: Request) {
     } = req;
 
 
-    const feedbackPrompt = 
-      `Rate this interview answer from 1-10 and provide one sentence of feedback. ` +
-      `Question: "${mockInterviewQuestion[activeQuestionIndex]?.question}" ` +
-      `Answer: "${userAnswer}" ` + 
-      `Return only JSON: {"rating": number, "feedback": "string"}`;
+    const feedbackPrompt = `
+Evaluate the quality of the following interview response based on relevance, accuracy, depth, and clarity. 
+
+- Rate the response on a scale of 1-10 (1 = poor, 10 = excellent).
+- Provide a brief, constructive feedback sentence.
+- Identify key skills assessed in the response and assign each a score from 0-100.
+
+Return only JSON in the following format:
+{
+  "rating": number,
+  "feedback": "string",
+  "tags": { "skill1": score, "skill2": score ... }
+}
+
+Question: "${mockInterviewQuestion[activeQuestionIndex]?.question}" 
+Answer: "${userAnswer}"
+`;
+
 
     const result = await chatSession.sendMessage(feedbackPrompt);
     const mockJsonResp = (await result.response.text())
