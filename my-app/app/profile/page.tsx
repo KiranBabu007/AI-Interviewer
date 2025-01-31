@@ -54,7 +54,7 @@ const InterviewItemCard = ({ interview }) => {
                 key={index}
                 className={`text-sm px-3 py-1.5 rounded-full font-medium ${getTagColor(tag.score)}`}
               >
-                {tag.skill} • {tag.score}
+                {tag.skill}
               </span>
             ))}
           </div>
