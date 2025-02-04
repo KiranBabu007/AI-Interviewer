@@ -1,19 +1,39 @@
-import React, { ReactNode } from 'react';
+"use client"
+import React, { ReactNode, useEffect, useState } from 'react';
 import Image from 'next/image'
+import { LoaderCircle } from 'lucide-react';
+import { BackgroundBeams } from '@/components/ui/background-beams';
 
 interface LayoutProps {
   children: ReactNode;
 }
 
 const Layout = ({ children }: LayoutProps) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  useEffect(() => {
+    // Preload the background image.
+    const img = new window.Image();
+    img.src = "/ai.png";
+    img.onload = () => setImageLoaded(true);
+  }, []);
+
+  if (!imageLoaded) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <LoaderCircle className="animate-spin h-10 w-10" />
+      </div>
+    );
+  }
   return (
     <section className="bg-white dark:bg-gray-900">
+      <BackgroundBeams className="absolute inset-0 z-0" />
       <div className="lg:grid lg:min-h-screen lg:grid-cols-12">
-        <section className="relative flex h-32 items-end bg-gray-900 lg:col-span-5 lg:h-full xl:col-span-6">
+        <section className="relative flex h-32 items-end bg-gray-950 lg:col-span-5 lg:h-full xl:col-span-6">
         <Image
             alt="AI Interviewer background"
-            width={3000}  
-            height={2000}  
+            width={3480}  
+            height={1956}  
             src="/ai.png"
             className="absolute inset-0 h-full w-full object-cover opacity-80"
             quality={100}
