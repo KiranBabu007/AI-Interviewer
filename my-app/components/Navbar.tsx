@@ -17,7 +17,7 @@ const Navbar = ({
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-  const isHomePage = pathname === "/Home";
+  const isHomePage = pathname === "/";
 
   return (
     <nav className="bg-black text-white">

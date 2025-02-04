@@ -1,37 +1,33 @@
 "use client"
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import './globals.css';
+import React, { useRef } from 'react'
+import Landing from '@/components/Landing'
+import AboutUs from '@/components/About'
+import HowItWorks  from '@/components/HowItWorks'
+import Navbar from '@/components/Navbar'
 
-export default function HomePage() {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
+const Page = () => {
+  const aboutRef = useRef<HTMLDivElement>(null);
+  const howItWorksRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    setIsLoading(true);
-    router.push("/Home");
-  }, [router]);
+  const scrollToAboutUs = () => {
+    aboutRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
+  const scrollToHowItWorks = () => {
+    howItWorksRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
   return (
-    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
-      {isLoading && (
-        <div className="spinner">
-          <style jsx>{`
-            .spinner {
-              width: 40px;
-              height: 40px;
-              border: 4px solid #f3f3f3;
-              border-top: 4px solid #3498db;
-              border-radius: 50%;
-              animation: spin 1s linear infinite;
-            }
-            @keyframes spin {
-              0% { transform: rotate(0deg); }
-              100% { transform: rotate(360deg); }
-            }
-          `}</style>
-        </div>
-      )}
+    <div>
+    <Navbar onAboutClick={scrollToAboutUs} onHowItWorksClick={scrollToHowItWorks} />
+    <Landing />
+    <div ref={aboutRef}>
+      <AboutUs />
     </div>
-  );
+    <div ref={howItWorksRef}>
+        <HowItWorks />
+      </div>
+  </div>
+  )
 }
+
+export default Page
