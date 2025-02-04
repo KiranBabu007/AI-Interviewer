@@ -12,10 +12,8 @@ const Landing = () => {
   const handleGetStarted = () => {
     setLoading(true);
     
-    setTimeout(() => {
-      router.push('/dashboard');
-      setLoading(false);
-    }, 400);
+    router.push('/dashboard');
+     
   };
 
   return (
