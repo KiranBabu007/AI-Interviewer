@@ -26,20 +26,22 @@ const Layout = ({ children }: LayoutProps) => {
     );
   }
   return (
-    <section className="bg-white dark:bg-gray-900">
+    <section className="bg-white dark:bg-gray-950">
       <BackgroundBeams className="absolute inset-0 z-0" />
+     
       <div className="lg:grid lg:min-h-screen lg:grid-cols-12">
-        <section className="relative flex h-32 items-end bg-gray-950 lg:col-span-5 lg:h-full xl:col-span-6">
-        <Image
-            alt="AI Interviewer background"
-            width={3480}  
-            height={1956}  
-            src="/ai.png"
-            className="absolute inset-0 h-full w-full object-cover opacity-80"
-            quality={100}
-            priority
-          />
-    
+      <section className="relative flex h-32 items-end bg-black lg:col-span-5 lg:h-full xl:col-span-6">
+  <Image
+    alt="AI Interviewer background"
+    width={3480}  
+    height={1956}  
+    src="/ai.png"
+    className="absolute inset-0 h-full w-full object-cover "
+    quality={100}
+    priority
+  />
+  <div className="absolute inset-0 bg-gradient-to-t from-black opacity-75 "></div>
+          
           <div className="hidden lg:relative lg:block lg:p-12">
             <a className="block text-white" href="#">
               <span className="sr-only">Home</span>
@@ -60,7 +62,7 @@ const Layout = ({ children }: LayoutProps) => {
               Welcome to AI Interviewer
             </h2>
     
-            <p className="mt-4 leading-relaxed text-white/90">
+            <p className="mt-4 font-mono  leading-relaxed text-white/90">
             Meet Your Future, Faster: Our AI Interviewer Transforms Job Screening with Real-Time Insights and Unbiased Precision – Start Your Journey with the Interviewer of Tomorrow!
             </p>
           </div>
