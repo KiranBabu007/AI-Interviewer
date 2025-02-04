@@ -10,8 +10,7 @@ const Landing = () => {
   const router = useRouter();
 
   const handleGetStarted = () => {
-    setLoading(true);
-    
+    setLoading(true); 
     router.push('/dashboard');
      
   };

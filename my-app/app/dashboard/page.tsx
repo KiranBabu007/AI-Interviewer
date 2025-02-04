@@ -1,7 +1,11 @@
 "use client"
 import AIInterview from "@/components/AddInterview";
 import React, { useState } from "react";
-import { Mic, Video, CheckCircle } from 'lucide-react';
+import { Mic, Video, CheckCircle, ShieldCheck, Volume2, MessagesSquare } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 
 const Page = () => {
   const [audioPermission, setAudioPermission] = useState(false);
@@ -10,7 +14,6 @@ const Page = () => {
   const requestPermissions = async (type: 'audio' | 'video') => {
     try {
       if ((type === 'audio' && audioPermission) || (type === 'video' && videoPermission)) {
-        
         if (type === 'audio') setAudioPermission(false);
         if (type === 'video') setVideoPermission(false);
         return;
@@ -20,11 +23,9 @@ const Page = () => {
         audio: type === 'audio',
         video: type === 'video'
       });
-
       
       if (type === 'audio') setAudioPermission(true);
       if (type === 'video') setVideoPermission(true);
-
       
       stream.getTracks().forEach(track => track.stop());
     } catch (err) {
@@ -35,67 +36,132 @@ const Page = () => {
   };
 
   return (
-    <div className="z-20 min-h-full">
-      <div className="h-full md:h-screen w-full dark:bg-black bg-white dark:bg-grid-white/[0.2] bg-grid-black/[0.2] relative flex flex-col md:flex-row">
-        <div className="absolute pointer-events-none inset-0 flex dark:bg-black bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
-        
-     
-        <div className="w-[100] md:w-2/3 py-8 px-10 md:px-20 justify-start flex flex-col">
-          <p className="text-3xl sm:text-5xl font-bold relative z-20 bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-500">
-            Welcome to AI-Interviewer
-          </p>
-          <p className="font-bold font-sm relative z-20 text-gray-300 mt-2 opacity-80">
-            Setup your Desired Interview Details
-          </p>
-          <div className="pt-8 grid grid-cols-1 z-20">
-            <AIInterview />
-          </div>
-        </div>
-
-        {/* Right Panel - Instructions */}
-        <div className="w-[100%] md:w-1/2 py-8 px-10 md:px-20 relative z-20 text-white">
-          <h2 className="text-2xl font-bold mb-6">Getting Started</h2>
-          
-          {/* Permissions */}
-          <div className="mb-8">
-            <h3 className="text-xl mb-4">Enable Permissions</h3>
-            <div className="space-y-4">
-              <button
-                onClick={() => requestPermissions('audio')}
-                className={`flex items-center text-black space-x-2 p-2 rounded ${
-                  audioPermission ? 'bg-green-400' : 'bg-white hover:bg-gray-100'
-                }`}
-              >
-                {audioPermission ? <CheckCircle className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-                <span>{audioPermission ? 'Microphone Enabled' : 'Enable Microphone'}</span>
-              </button>
-              
-              <button
-                onClick={() => requestPermissions('video')}
-                className={`flex items-center text-black space-x-2 p-2 rounded ${
-                  videoPermission ? 'bg-green-400' : 'bg-white hover:bg-gray-100'
-                }`}
-              >
-                {videoPermission ? <CheckCircle className="w-5 h-5" /> : <Video className="w-5 h-5" />}
-                <span>{videoPermission ? 'Camera Enabled' : 'Enable Camera'}</span>
-              </button>
+    <div className="min-h-screen bg-black text-white">
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column */}
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+                AI-Powered Interview Practice
+              </h1>
+              <p className="text-gray-400 text-lg">
+                Perfect your interview skills with our intelligent system
+              </p>
             </div>
+
+            <Separator className="my-6 bg-gray-800" />
+
+            <Card className="bg-gray-900 border-gray-800">
+              <CardHeader>
+                <CardTitle className="text-white">Device Permissions</CardTitle>
+                <CardDescription className="text-gray-400">Enable access to your camera and microphone</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Button
+                  onClick={() => requestPermissions('audio')}
+                  variant={audioPermission ? "secondary" : "outline"}
+                  className="w-full justify-start gap-2 border-gray-700 hover:bg-gray-800"
+                >
+                  {audioPermission ? (
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                  ) : (
+                    <Mic className="w-4 h-4" />
+                  )}
+                  {audioPermission ? 'Microphone Enabled' : 'Enable Microphone'}
+                </Button>
+
+                <Button
+                  onClick={() => requestPermissions('video')}
+                  variant={videoPermission ? "secondary" : "outline"}
+                  className="w-full justify-start gap-2 border-gray-700 hover:bg-gray-800"
+                >
+                  {videoPermission ? (
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                  ) : (
+                    <Video className="w-4 h-4" />
+                  )}
+                  {videoPermission ? 'Camera Enabled' : 'Enable Camera'}
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Separator className="my-6 bg-gray-800" />
+
+            <Card className="bg-gray-900 border-gray-800">
+              <CardHeader>
+                <CardTitle className="text-white">Key Features</CardTitle>
+                <CardDescription className="text-gray-400">What makes our AI interviewer special</CardDescription>
+              </CardHeader>
+              <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex items-start space-x-3">
+                  <ShieldCheck className="w-5 h-5 text-white mt-1" />
+                  <div>
+                    <h3 className="font-medium text-white">Secure Environment</h3>
+                    <p className="text-sm text-gray-400">Private and confidential sessions</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <Volume2 className="w-5 h-5 text-white mt-1" />
+                  <div>
+                    <h3 className="font-medium text-white">Voice Analysis</h3>
+                    <p className="text-sm text-gray-400">Real-time feedback on speech</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <MessagesSquare className="w-5 h-5 text-white mt-1" />
+                  <div>
+                    <h3 className="font-medium text-white">Smart Responses</h3>
+                    <p className="text-sm text-gray-400">Adaptive conversation flow</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
-          
-          <div className="space-y-4 bg-white p-5 md:p-8 rounded-lg bg-opacity-20">
-            <h3 className="text-xl mb-4">Interview Guidelines</h3>
-            <ul className="list-disc list-inside space-y-2 text-gray-300">
-              <li>Ensure you&apos;re in a quiet environment</li>
-              <li>Position yourself in front of the camera</li>
-              <li>Speak clearly and maintain eye contact</li>
-              <li>Have your resume ready for reference</li>
-              <li>You can pause or end the interview at any time</li>
-            </ul>
-          </div>
+          {/* Right Column */}
+          <div className="space-y-6">
+            <Card className="bg-gray-900/50 border-gray-800 backdrop-blur">
+              <CardHeader>
+                <div className="space-y-2">
+                  <Badge variant="secondary" className="w-fit bg-gray-800 text-white">Setup Required</Badge>
+                  <CardTitle className="text-white">Interview Configuration</CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Customize your interview experience
+                  </CardDescription>
+                </div>
+              </CardHeader>
+              <Separator className="mb-6 bg-gray-800" />
+              <CardContent>
+                <AIInterview />
+              </CardContent>
+            </Card>
 
+            <Card className="bg-gray-900 border-gray-800">
+              <CardHeader>
+                <CardTitle className="text-white">Interview Guidelines</CardTitle>
+                <CardDescription className="text-gray-400">Follow these tips for the best experience</CardDescription>
+              </CardHeader>
+              <Separator className="mb-6 bg-gray-800" />
+              <CardContent>
+                <ul className="space-y-3">
+                  {[
+                    "Find a quiet environment with good lighting",
+                    "Position yourself centered in the camera frame",
+                    "Speak clearly and maintain virtual eye contact",
+                    "Have your resume and notes readily available",
+                    "Take your time to think before responding"
+                  ].map((tip, index) => (
+                    <li key={index} className="flex items-center space-x-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                      <span className="text-gray-400">{tip}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-
       </div>
     </div>
   );
