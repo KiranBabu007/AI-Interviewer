@@ -1,3 +1,4 @@
+// RecordAnswerSection.tsx
 "use client"
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,12 +17,14 @@ interface RecordAnswerSectionProps {
   mockInterviewQuestion: { question: string }[];
   activeQuestionIndex: number;
   interviewData: InterviewData | null;
+  setIsProcessing: (isProcessing: boolean) => void;
 }
 
 const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({ 
   mockInterviewQuestion, 
   activeQuestionIndex, 
-  interviewData 
+  interviewData,
+  setIsProcessing
 }) => {
   const [userAnswer, setUserAnswer] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -33,6 +36,10 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    setIsProcessing(loading || isTranscribing);
+  }, [loading, isTranscribing, setIsProcessing]);
 
   const startAudioRecording = async () => {
     try {

@@ -1,10 +1,10 @@
 import { db } from '@/utils/db';
-import { MockInterview } from '@/utils/schema';
+import { MockInterview, UserAnswer } from '@/utils/schema';
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 import { chatSession } from '@/utils/GeminiAiModel';
 import { auth, currentUser } from '@clerk/nextjs/server';
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, avg } from "drizzle-orm";
 
 export async function POST(request: Request) {
     try {
@@ -68,7 +68,7 @@ export async function POST(request: Request) {
             jobType: interviewType,
             jobExperience: experience,
             createdBy: user.emailAddresses[0].emailAddress,
-            createdAt: moment().format('DD-MM-yyyy')
+            createdAt: moment().format('DD-MM-YYYY')
         };
 
         const resp = await db
@@ -92,12 +92,39 @@ export async function GET() {
             return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
+        const userEmail = user.emailAddresses[0].emailAddress;
+
+        // Get the interviews
         const interviews = await db
             .select()
             .from(MockInterview)
-            .where(eq(MockInterview.createdBy, user.emailAddresses[0].emailAddress))
-            .orderBy(desc(MockInterview.id))
-        return Response.json(interviews);
+            .where(eq(MockInterview.createdBy, userEmail))
+            .orderBy(desc(MockInterview.createdAt));
+
+        // Calculate average rating
+        const averageRating = await db
+            .select({
+                averageScore: avg(UserAnswer.rating)
+            })
+            .from(UserAnswer)
+            .where(eq(UserAnswer.userEmail, userEmail));
+
+        // Handle the average score calculation with proper type checking
+        let formattedAverageScore = '0.0';
+        const avgScore = averageRating[0]?.averageScore;
+        if (avgScore !== null && avgScore !== undefined) {
+            formattedAverageScore = Number(avgScore).toFixed(1);
+        }
+
+        return Response.json({
+            interviews,
+            stats: {
+                completedInterviews: interviews.length,
+                averageScore: formattedAverageScore,
+                totalHours: '12.5',
+                upcomingSessions: '3'
+            }
+        });
     } catch (error) {
         console.error('Error fetching interviews:', error);
         return Response.json({ error: 'Internal server error' }, { status: 500 });
