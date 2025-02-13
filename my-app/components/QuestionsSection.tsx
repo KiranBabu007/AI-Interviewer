@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, use } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Lightbulb, Volume2 } from "lucide-react";
 import {
   AlertDialog,
@@ -32,7 +32,6 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
   const router = useRouter();
   const [videoUrl, setVideoUrl] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isVideoReady, setIsVideoReady] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -104,7 +103,7 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
           clearInterval(bufferCheckIntervalRef.current);
           bufferCheckIntervalRef.current = null;
         }
-        setIsVideoReady(true);
+        
         // Now we can show the actual video player
         setShowVideo(true);
         if (videoRef.current) {
@@ -139,7 +138,6 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
       preloadHlsRef.current = null;
     }
     setVideoUrl('');
-    setIsVideoReady(false);
     setShowVideo(false);
     setLoadingProgress(0);
   }, [activeQuestionIndex]);
@@ -245,19 +243,7 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
         </AlertDialog>
       </div>
 
-      <div className="grid grid-cols-2 gap-5">
-        {mockInterviewQuestion.map((question, index) => (
-          <div key={index}>
-            <h2
-              className={`p-2 bg-secondary text-black rounded-full text-xs md:text-sm text-center cursor-pointer ${
-                activeQuestionIndex === index ? "bg-blue-600 text-black" : ""
-              }`}
-            >
-              Question #{index + 1}
-            </h2>
-          </div>
-        ))}
-      </div>
+      
 
       <div className="my-5">
         {videoUrl ? (
@@ -265,7 +251,7 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
             {!showVideo ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 rounded-lg">
                 <div className="text-white mb-2">
-                  Loading... {Math.round(loadingProgress)}%
+                  Thinking... {Math.round(loadingProgress)}%
                 </div>
                 <div className="w-64 h-2 bg-gray-700 rounded-full">
                   <div 
