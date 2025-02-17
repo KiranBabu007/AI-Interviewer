@@ -3,99 +3,40 @@ import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import { Settings, User, Calendar, Bell, Activity, FileText } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import Image from 'next/image';
-
-const InterviewItemCard = ({ interview }) => {
-  const router = useRouter();
-
-  const onFeedbackPress = () => {
-    router.push('dashboard/interview/' + interview.mockId + "/feedback");
-  };
-
-  const getTagColor = (score) => {
-    if (score >= 8) return 'bg-emerald-500/80 text-emerald-50';
-    if (score >= 5) return 'bg-amber-500/80 text-amber-50';
-    return 'bg-rose-500/80 text-rose-50';
-  };
-
-  const parseTags = (tags) => {
-    try {
-      const parsedTags = JSON.parse(tags);
-      return Object.entries(parsedTags).map(([skill, score]) => ({
-        skill,
-        score
-      }));
-    } catch (error) {
-      console.error("Error parsing tags:", error);
-      return [];
-    }
-  };
-
-  const tags = parseTags(interview?.tags || '{}');
-
-  return (
-    <Card className="bg-white/5 hover:bg-white/10 transition-colors duration-200 border-0">
-      <CardContent className="p-6">
-        <div className="space-y-4">
-          <div>
-            <h3 className="font-semibold text-lg text-white">{interview?.jobPosition}</h3>
-            <p className="text-sm text-gray-400">{interview?.jobExperience}</p>
-            <p className="text-xs text-gray-500 mt-1">
-              Created At: {interview?.createdAt}
-            </p>
-          </div>
-          
-          <div className="flex flex-wrap gap-2">
-            {tags.map((tag, index) => (
-              <span
-                key={index}
-                className={`text-sm px-3 py-1.5 rounded-full font-medium ${getTagColor(tag.score)}`}
-              >
-                {tag.skill}
-              </span>
-            ))}
-          </div>
-
-          <Button 
-            variant="outline" 
-            className="w-full hover:bg-white/10" 
-            onClick={onFeedbackPress}
-          >
-            View Feedback
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
+import GroupedInterviewList from '@/components/GroupedInterviewList';
 
 const Page = () => {
   const { isLoaded, isSignedIn, user } = useUser();
   const [interviewList, setInterviewList] = useState([]);
+  const [stats, setStats] = useState({
+    completedInterviews: '0',
+    averageScore: '0.0',
+    totalHours: '12.5',
+    upcomingSessions: '3'
+  });
   const [isLoading, setIsLoading] = useState(true);
 
   const userStats = [
     { 
       label: 'Completed Interviews',
-      value: '24',
+      value: stats.completedInterviews,
       icon: Calendar 
     },
     { 
       label: 'Average Score',
-      value: '8.5/10',
+      value: `${stats.averageScore}/10`,
       icon: Activity 
     },
     { 
       label: 'Total Hours',
-      value: '12.5',
+      value: stats.totalHours,
       icon: FileText 
     },
     { 
       label: 'Upcoming Sessions',
-      value: '3',
+      value: stats.upcomingSessions,
       icon: Bell 
     }
   ];
@@ -120,8 +61,9 @@ const Page = () => {
         throw new Error('Failed to fetch interviews');
       }
 
-      const interviews = await response.json();
-      setInterviewList(interviews);
+      const data = await response.json();
+      setInterviewList(data.interviews);
+      setStats(data.stats);
     } catch (err) {
       console.error('Error fetching interviews:', err);
     } finally {
@@ -183,29 +125,18 @@ const Page = () => {
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Previous Interviews */}
-          <Card className="lg:col-span-2 bg-white/5 border-0">
-            <CardHeader className="p-6">
-              <CardTitle className="text-xl text-white flex items-center gap-3">
-                <Calendar className="w-6 h-6" />
-                Previous Mock Interviews
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 pt-0">
-              {isLoading ? (
-                <div className="text-white/80">Loading interviews...</div>
-              ) : (
-                <div className="space-y-6">
-                  {interviewList.map((interview, index) => (
-                    <InterviewItemCard 
-                      interview={interview} 
-                      key={index} 
-                    />
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          {/* Grouped Interview List */}
+          <div className="lg:col-span-2">
+            {isLoading ? (
+              <Card className="bg-white/5 border-0">
+                <CardContent className="p-6">
+                  <div className="text-white/80">Loading interviews...</div>
+                </CardContent>
+              </Card>
+            ) : (
+              <GroupedInterviewList interviews={interviewList} />
+            )}
+          </div>
 
           {/* Recent Activity */}
           <Card className="bg-white/5 border-0">

@@ -19,6 +19,12 @@ interface QuestionsSectionProps {
   activeQuestionIndex: number;
 }
 
+interface Config {
+  ttsAPIKey: string;
+  simliAPIKey: string;
+  faceId: string;
+}
+
 const QuestionsSection: React.FC<QuestionsSectionProps> = ({
   mockInterviewQuestion,
   activeQuestionIndex,
@@ -26,18 +32,23 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
   const router = useRouter();
   const [videoUrl, setVideoUrl] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const preloadVideoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
+  const preloadHlsRef = useRef<Hls | null>(null);
+  const bufferCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Configure your API keys and face ID
-  const CONFIG = {
+  const CONFIG: Config = {
     ttsAPIKey: process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY || '',
     simliAPIKey: process.env.NEXT_PUBLIC_SIMLI_API_KEY || '',
-    faceId: 'tmp9i8bbq7c', // Replace with your preferred face ID
+    faceId: 'tmp9i8bbq7c',
   };
 
   const generateAvatarVideo = async (text: string) => {
     setIsLoading(true);
+    setShowVideo(false);
     try {
       const response = await fetch('https://api.simli.ai/textToVideoStream', {
         method: 'POST',
@@ -59,12 +70,10 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
           }
         })
       });
-      console.log('response', response);
       const data = await response.json();
       setVideoUrl(data.hls_url);
     } catch (error) {
       console.error('Error generating avatar video:', error);
-      // Fallback to basic text-to-speech if avatar generation fails
       if ("speechSynthesis" in window) {
         const speech = new SpeechSynthesisUtterance(text);
         window.speechSynthesis.speak(speech);
@@ -74,78 +83,144 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
     }
   };
 
+  const checkBufferStatus = () => {
+    if (!preloadVideoRef.current) return;
+    
+    const video = preloadVideoRef.current;
+    const buffered = video.buffered;
+    
+    if (buffered.length > 0) {
+      const duration = video.duration;
+      const bufferedEnd = buffered.end(buffered.length - 1);
+      const bufferedStart = buffered.start(0);
+      
+      const bufferPercentage = (bufferedEnd / duration) * 100;
+      setLoadingProgress(Math.min(bufferPercentage, 100));
+
+      // Check if video is fully buffered
+      if (bufferedEnd >= duration - 0.5 && bufferedStart <= 0.5) {
+        if (bufferCheckIntervalRef.current) {
+          clearInterval(bufferCheckIntervalRef.current);
+          bufferCheckIntervalRef.current = null;
+        }
+        
+        // Now we can show the actual video player
+        setShowVideo(true);
+        if (videoRef.current) {
+          videoRef.current.currentTime = 0;
+          videoRef.current.play().catch(console.error);
+        }
+      }
+    }
+  };
+
   useEffect(() => {
-    // Cleanup previous HLS instance when question changes
+    return () => {
+      if (bufferCheckIntervalRef.current) {
+        clearInterval(bufferCheckIntervalRef.current);
+      }
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+      }
+      if (preloadHlsRef.current) {
+        preloadHlsRef.current.destroy();
+      }
+    };
+  }, []);
+  
+  useEffect(() => {
     if (hlsRef.current) {
       hlsRef.current.destroy();
       hlsRef.current = null;
     }
+    if (preloadHlsRef.current) {
+      preloadHlsRef.current.destroy();
+      preloadHlsRef.current = null;
+    }
     setVideoUrl('');
+    setShowVideo(false);
+    setLoadingProgress(0);
   }, [activeQuestionIndex]);
 
   useEffect(() => {
-    if (!videoRef.current || !videoUrl) return;
+    if (!videoUrl) return;
 
     if (Hls.isSupported()) {
-      // Cleanup previous instance if it exists
+      // Setup preload video
+      if (preloadHlsRef.current) {
+        preloadHlsRef.current.destroy();
+      }
+
+      const preloadHls = new Hls({
+        maxBufferLength: 60,
+        maxMaxBufferLength: 600,
+        maxBufferSize: 600 * 1000 * 1000,
+        maxBufferHole: 0.1,
+        lowLatencyMode: false,
+        backBufferLength: 90,
+        enableWorker: true,
+        startPosition: 0,
+        debug: false
+      });
+
+      preloadHlsRef.current = preloadHls;
+      if (preloadVideoRef.current) {
+        preloadHls.loadSource(videoUrl);
+        preloadHls.attachMedia(preloadVideoRef.current);
+      }
+
+      preloadHls.on(Hls.Events.MANIFEST_PARSED, () => {
+        if (bufferCheckIntervalRef.current) {
+          clearInterval(bufferCheckIntervalRef.current);
+        }
+        bufferCheckIntervalRef.current = setInterval(checkBufferStatus, 1000);
+      });
+
+      // Setup main video player
       if (hlsRef.current) {
         hlsRef.current.destroy();
       }
 
       const hls = new Hls({
-        maxBufferLength: 30,
-        maxMaxBufferLength: 60,
-        maxBufferSize: 60 * 1000 * 1000, // 60MB
-        maxBufferHole: 0.5,
-        lowLatencyMode: true,
-        backBufferLength: 30
+        maxBufferLength: 60,
+        maxMaxBufferLength: 600,
+        maxBufferSize: 600 * 1000 * 1000,
+        maxBufferHole: 0.1,
+        lowLatencyMode: false,
+        backBufferLength: 90,
+        enableWorker: true,
+        startPosition: 0,
+        debug: false
       });
 
       hlsRef.current = hls;
-      hls.loadSource(videoUrl);
-      hls.attachMedia(videoRef.current);
+      if (videoRef.current) {
+        hls.loadSource(videoUrl);
+        hls.attachMedia(videoRef.current);
+      }
 
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        videoRef.current?.play().catch(console.error);
-      });
-
-      hls.on(Hls.Events.ERROR, (event, data) => {
-        if (data.fatal) {
-          switch (data.type) {
-            case Hls.ErrorTypes.NETWORK_ERROR:
-              console.log('Network error, trying to recover...');
-              hls.startLoad();
-              break;
-            case Hls.ErrorTypes.MEDIA_ERROR:
-              console.log('Media error, trying to recover...');
-              hls.recoverMediaError();
-              break;
-            default:
-              console.error('Fatal error, destroying HLS instance:', data);
-              hls.destroy();
-              break;
-          }
-        }
-      });
-    } else if (videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
-      // Native HLS support (Safari)
-      videoRef.current.src = videoUrl;
-      videoRef.current.addEventListener('loadedmetadata', () => {
-        videoRef.current?.play().catch(console.error);
-      });
+    } else if (videoRef.current?.canPlayType('application/vnd.apple.mpegurl')) {
+      // Fallback for Safari
+      if (preloadVideoRef.current) preloadVideoRef.current.src = videoUrl;
+      if (videoRef.current) videoRef.current.src = videoUrl;
+      if (bufferCheckIntervalRef.current) {
+        clearInterval(bufferCheckIntervalRef.current);
+      }
+      bufferCheckIntervalRef.current = setInterval(checkBufferStatus, 1000);
     }
 
-    // Cleanup function
-    return () => {
-      if (hlsRef.current) {
-        hlsRef.current.destroy();
-        hlsRef.current = null;
-      }
-    };
   }, [videoUrl]);
 
   return mockInterviewQuestion ? (
     <div className="p-5 z-10 rounded-lg my-10">
+      {/* Hidden preload video element */}
+      <video
+        ref={preloadVideoRef}
+        className="hidden"
+        preload="auto"
+        muted
+      />
+
       <div className="mb-5">
         <AlertDialog>
           <AlertDialogTrigger className="h-9 px-6 text-sm bg-red-700 text-white rounded-lg hover:bg-red-800 z-50">
@@ -168,26 +243,27 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
         </AlertDialog>
       </div>
 
-      <div className="grid grid-cols-2 gap-5">
-        {mockInterviewQuestion.map((question, index) => (
-          <div key={index}>
-            <h2
-              className={`p-2 bg-secondary text-black rounded-full text-xs md:text-sm text-center cursor-pointer ${
-                activeQuestionIndex === index ? "bg-blue-600 text-black" : ""
-              }`}
-            >
-              Question #{index + 1}
-            </h2>
-          </div>
-        ))}
-      </div>
+      
 
       <div className="my-5">
         {videoUrl ? (
           <div className="relative w-full aspect-video max-w-lg mx-auto mb-5">
+            {!showVideo ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 rounded-lg">
+                <div className="text-white mb-2">
+                  Thinking... {Math.round(loadingProgress)}%
+                </div>
+                <div className="w-64 h-2 bg-gray-700 rounded-full">
+                  <div 
+                    className="h-full bg-blue-500 rounded-full transition-all duration-300"
+                    style={{ width: `${loadingProgress}%` }}
+                  />
+                </div>
+              </div>
+            ) : null}
             <video
               ref={videoRef}
-              className="rounded-lg w-full h-full"
+              className={`rounded-lg w-full h-full ${!showVideo ? 'hidden' : ''}`}
               controls
               playsInline
               autoPlay

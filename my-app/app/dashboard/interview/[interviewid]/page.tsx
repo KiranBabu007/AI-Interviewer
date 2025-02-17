@@ -22,6 +22,7 @@ const Page = () => {
   const [questions, setQuestions] = useState<MockInterviewQuestion[] | null>(null);
   const [activeQuestionIndex, setActiveQuestionIndex] = useState<number>(0);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [snapshots, setSnapshots] = useState<string[]>([]);
   const [isWebcamReady, setIsWebcamReady] = useState(false);
   const interviewId = useParams().interviewid;
@@ -94,13 +95,12 @@ const Page = () => {
           const imageBlob = base64ToBlob(snapshot);
           formData.append(`image_${index}`, imageBlob);
           formData.append('mockId', interviewDetails?.mockId || '');
-          formData.append('user',interviewDetails?.createdBy || '');
+          formData.append('user', interviewDetails?.createdBy || '');
         } catch (error) {
           console.error(`Failed to process snapshot ${index}:`, error);
         }
       });
 
-      
       const response = await fetch('/api/analyze-behavior', {
         method: 'POST',
         body: formData
@@ -134,7 +134,7 @@ const Page = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ interviewId }), // Pass interviewId in the body
+        body: JSON.stringify({ interviewId }),
       });
   
       if (!response.ok) {
@@ -151,9 +151,8 @@ const Page = () => {
 
   useEffect(() => {
     GetInterviewDetails();
-  }, [GetInterviewDetails,activeQuestionIndex]);
+  }, [GetInterviewDetails, activeQuestionIndex]);
 
-  // Only initialize the snapshot capture when webcam is ready
   useEffect(() => {
     if (isWebcamReady) {
       startSnapshotCapture();
@@ -165,7 +164,6 @@ const Page = () => {
     <div className="relative h-screen w-full bg-neutral-950 flex flex-col overflow-hidden">
       <BackgroundBeams className="absolute inset-0 z-0" />
       
-      {/* Add overflow-hidden and h-screen to the container to prevent scrolling */}
       <div className="relative flex-grow overflow-hidden py-8 z-10 h-screen">
         <div className="container mx-auto px-4 h-full">
           <div className='grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 h-full'>
@@ -174,7 +172,7 @@ const Page = () => {
                 mockInterviewQuestion={questions || []} 
                 activeQuestionIndex={activeQuestionIndex}
               />
-              <div className="opacity-0 absolute"> {/* Use opacity-0 instead of hidden */}
+              <div className="opacity-0 absolute">
                 <Webcam
                   ref={webcamRef}
                   screenshotFormat="image/jpeg"
@@ -203,17 +201,21 @@ const Page = () => {
                 mockInterviewQuestion={questions || []} 
                 activeQuestionIndex={activeQuestionIndex} 
                 interviewData={interviewDetails}
+                setIsProcessing={setIsProcessing}
               />
               <div className='mt-auto flex justify-end gap-6'>
                 {questions && activeQuestionIndex !== 1 && (
-                  <Button onClick={() => setActiveQuestionIndex(activeQuestionIndex + 1)}>
+                  <Button 
+                    onClick={() => setActiveQuestionIndex(activeQuestionIndex + 1)}
+                    disabled={isProcessing}
+                  >
                     Next Question
                   </Button>
                 )}
                 {questions && activeQuestionIndex === 1 && (
                   <Button 
                     onClick={handleEndInterview}
-                    disabled={isAnalyzing}
+                    disabled={isProcessing || isAnalyzing}
                   >
                     {isAnalyzing ? (
                       <div className="flex items-center gap-2">
