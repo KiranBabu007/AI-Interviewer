@@ -12,7 +12,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
-import Hls from 'hls.js';
 
 interface QuestionsSectionProps {
   mockInterviewQuestion: { question: string }[];
@@ -20,7 +19,6 @@ interface QuestionsSectionProps {
 }
 
 interface Config {
-  ttsAPIKey: string;
   simliAPIKey: string;
   faceId: string;
 }
@@ -30,50 +28,57 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
   activeQuestionIndex,
 }) => {
   const router = useRouter();
-  const [videoUrl, setVideoUrl] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
-  const [showVideo, setShowVideo] = useState(false);
-  const [loadingProgress, setLoadingProgress] = useState(0);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const preloadVideoRef = useRef<HTMLVideoElement>(null);
-  const hlsRef = useRef<Hls | null>(null);
-  const preloadHlsRef = useRef<Hls | null>(null);
-  const bufferCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  // Ref to store the currently playing audio instance
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const CONFIG: Config = {
-    ttsAPIKey: process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY || '',
     simliAPIKey: process.env.NEXT_PUBLIC_SIMLI_API_KEY || '',
     faceId: 'tmp9i8bbq7c',
   };
 
-  const generateAvatarVideo = async (text: string) => {
+  /**
+   * Calls our API route to generate TTS audio from the given text,
+   * then creates a Blob URL and plays it.
+   */
+  const generateTextToSpeechAudio = async (text: string) => {
+    if (!text) return;
+
     setIsLoading(true);
-    setShowVideo(false);
     try {
-      const response = await fetch('https://api.simli.ai/textToVideoStream', {
+      const response = await fetch('/api/text-to-speech', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...CONFIG,
-          requestBody: {
-            audioProvider: 'ElevenLabs',
-            text: text,
-            voiceName: 'pMsXgVXv3BLzUgSXRplE',
-            model_id: 'eleven_turbo_v2',
-            voice_settings: {
-              stability: 0.1,
-              similarity_boost: 0.3,
-              style: 0.2
-            }
-          }
-        })
+        body: JSON.stringify({ text }),
       });
-      const data = await response.json();
-      setVideoUrl(data.hls_url);
+
+      if (!response.ok) {
+        throw new Error(`Failed to generate audio: ${response.statusText}`);
+      }
+
+      const blob = await response.blob();
+      const audioUrl = URL.createObjectURL(blob);
+
+      // If there's already an audio playing, stop it and revoke its URL.
+      if (audioRef.current) {
+        audioRef.current.pause();
+        URL.revokeObjectURL(audioRef.current.src);
+      }
+
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+      await audio.play();
+
+      // Clean up the blob URL after playing
+      audio.onended = () => {
+        URL.revokeObjectURL(audioUrl);
+        audioRef.current = null;
+      };
     } catch (error) {
-      console.error('Error generating avatar video:', error);
+      console.error('Error generating TTS audio:', error);
+      // Fallback to browser speech synthesis
       if ("speechSynthesis" in window) {
         const speech = new SpeechSynthesisUtterance(text);
         window.speechSynthesis.speak(speech);
@@ -83,144 +88,22 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
     }
   };
 
-  const checkBufferStatus = () => {
-    if (!preloadVideoRef.current) return;
-    
-    const video = preloadVideoRef.current;
-    const buffered = video.buffered;
-    
-    if (buffered.length > 0) {
-      const duration = video.duration;
-      const bufferedEnd = buffered.end(buffered.length - 1);
-      const bufferedStart = buffered.start(0);
-      
-      const bufferPercentage = (bufferedEnd / duration) * 100;
-      setLoadingProgress(Math.min(bufferPercentage, 100));
-
-      // Check if video is fully buffered
-      if (bufferedEnd >= duration - 0.5 && bufferedStart <= 0.5) {
-        if (bufferCheckIntervalRef.current) {
-          clearInterval(bufferCheckIntervalRef.current);
-          bufferCheckIntervalRef.current = null;
-        }
-        
-        // Now we can show the actual video player
-        setShowVideo(true);
-        if (videoRef.current) {
-          videoRef.current.currentTime = 0;
-          videoRef.current.play().catch(console.error);
-        }
-      }
-    }
-  };
-
+  // Effect to automatically play TTS when question changes or component mounts
   useEffect(() => {
+    generateTextToSpeechAudio(mockInterviewQuestion[activeQuestionIndex]?.question);
+
+    // Cleanup function to stop audio when the component unmounts
     return () => {
-      if (bufferCheckIntervalRef.current) {
-        clearInterval(bufferCheckIntervalRef.current);
-      }
-      if (hlsRef.current) {
-        hlsRef.current.destroy();
-      }
-      if (preloadHlsRef.current) {
-        preloadHlsRef.current.destroy();
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        audioRef.current = null;
       }
     };
-  }, []);
-  
-  useEffect(() => {
-    if (hlsRef.current) {
-      hlsRef.current.destroy();
-      hlsRef.current = null;
-    }
-    if (preloadHlsRef.current) {
-      preloadHlsRef.current.destroy();
-      preloadHlsRef.current = null;
-    }
-    setVideoUrl('');
-    setShowVideo(false);
-    setLoadingProgress(0);
-  }, [activeQuestionIndex]);
-
-  useEffect(() => {
-    if (!videoUrl) return;
-
-    if (Hls.isSupported()) {
-      // Setup preload video
-      if (preloadHlsRef.current) {
-        preloadHlsRef.current.destroy();
-      }
-
-      const preloadHls = new Hls({
-        maxBufferLength: 60,
-        maxMaxBufferLength: 600,
-        maxBufferSize: 600 * 1000 * 1000,
-        maxBufferHole: 0.1,
-        lowLatencyMode: false,
-        backBufferLength: 90,
-        enableWorker: true,
-        startPosition: 0,
-        debug: false
-      });
-
-      preloadHlsRef.current = preloadHls;
-      if (preloadVideoRef.current) {
-        preloadHls.loadSource(videoUrl);
-        preloadHls.attachMedia(preloadVideoRef.current);
-      }
-
-      preloadHls.on(Hls.Events.MANIFEST_PARSED, () => {
-        if (bufferCheckIntervalRef.current) {
-          clearInterval(bufferCheckIntervalRef.current);
-        }
-        bufferCheckIntervalRef.current = setInterval(checkBufferStatus, 1000);
-      });
-
-      // Setup main video player
-      if (hlsRef.current) {
-        hlsRef.current.destroy();
-      }
-
-      const hls = new Hls({
-        maxBufferLength: 60,
-        maxMaxBufferLength: 600,
-        maxBufferSize: 600 * 1000 * 1000,
-        maxBufferHole: 0.1,
-        lowLatencyMode: false,
-        backBufferLength: 90,
-        enableWorker: true,
-        startPosition: 0,
-        debug: false
-      });
-
-      hlsRef.current = hls;
-      if (videoRef.current) {
-        hls.loadSource(videoUrl);
-        hls.attachMedia(videoRef.current);
-      }
-
-    } else if (videoRef.current?.canPlayType('application/vnd.apple.mpegurl')) {
-      // Fallback for Safari
-      if (preloadVideoRef.current) preloadVideoRef.current.src = videoUrl;
-      if (videoRef.current) videoRef.current.src = videoUrl;
-      if (bufferCheckIntervalRef.current) {
-        clearInterval(bufferCheckIntervalRef.current);
-      }
-      bufferCheckIntervalRef.current = setInterval(checkBufferStatus, 1000);
-    }
-
-  }, [videoUrl]);
+  }, [mockInterviewQuestion[activeQuestionIndex]?.question]);
 
   return mockInterviewQuestion ? (
     <div className="p-5 z-10 rounded-lg my-10">
-      {/* Hidden preload video element */}
-      <video
-        ref={preloadVideoRef}
-        className="hidden"
-        preload="auto"
-        muted
-      />
-
       <div className="mb-5">
         <AlertDialog>
           <AlertDialogTrigger className="h-9 px-6 text-sm bg-red-700 text-white rounded-lg hover:bg-red-800 z-50">
@@ -243,45 +126,20 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
         </AlertDialog>
       </div>
 
-      
-
-      <div className="my-5">
-        {videoUrl ? (
-          <div className="relative w-full aspect-video max-w-lg mx-auto mb-5">
-            {!showVideo ? (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 rounded-lg">
-                <div className="text-white mb-2">
-                  Thinking... {Math.round(loadingProgress)}%
-                </div>
-                <div className="w-64 h-2 bg-gray-700 rounded-full">
-                  <div 
-                    className="h-full bg-blue-500 rounded-full transition-all duration-300"
-                    style={{ width: `${loadingProgress}%` }}
-                  />
-                </div>
-              </div>
-            ) : null}
-            <video
-              ref={videoRef}
-              className={`rounded-lg w-full h-full ${!showVideo ? 'hidden' : ''}`}
-              controls
-              playsInline
-              autoPlay
-            >
-              Your browser does not support HLS video playback.
-            </video>
-          </div>
-        ) : (
-          <h2 className="text-md md:text-lg text-white">
+      {/* Centered large volume button */}
+      <div className="flex flex-col items-center my-5">
+      <h2 className="text-md md:text-lg text-white">
             {mockInterviewQuestion[activeQuestionIndex]?.question}
           </h2>
-        )}
-
         <Volume2 
-          className={`cursor-pointer bg-black text-white ${isLoading ? 'opacity-50' : ''}`}
-          onClick={() => !isLoading && generateAvatarVideo(mockInterviewQuestion[activeQuestionIndex]?.question)} 
+          size={80} // Increase the icon size
+          className={`cursor-pointer bg-black text-white rounded-full p-4 ${isLoading ? 'opacity-50' : ''}`}
+          onClick={() =>
+            !isLoading &&
+            generateTextToSpeechAudio(mockInterviewQuestion[activeQuestionIndex]?.question)
+          } 
         />
-        {isLoading && <span className="ml-2 text-sm text-gray-400">Generating avatar response...</span>}
+        {isLoading && <span className="mt-2 text-sm text-gray-400"></span>}
       </div>
 
       <div className="border rounded-lg p-5 opacity-70 bg-gray-100 mt-20">
