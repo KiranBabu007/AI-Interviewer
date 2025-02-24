@@ -15,7 +15,7 @@ import {
 
 const llm = new ChatGroq({
   model: "mixtral-8x7b-32768",
-  apiKey: process.env.NEXT_PUBLIC_GROQ_API_KEY,
+  apiKey: process.env.GROQ_API_KEY,
   temperature: 0,
 });
 
