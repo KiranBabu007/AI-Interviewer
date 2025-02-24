@@ -1,252 +1,200 @@
 import { db } from "@/utils/db";
-
 import { MockInterview, UserAnswer } from "@/utils/schema";
-
 import { v4 as uuidv4 } from "uuid";
-
 import moment from "moment";
-
 import { auth, currentUser } from "@clerk/nextjs/server";
-
 import { desc, eq, avg } from "drizzle-orm";
-
 import { ChatGroq } from "@langchain/groq";
+import {
+  START,
+  END,
+  MessagesAnnotation,
+  StateGraph,
+  MemorySaver,
+} from "@langchain/langgraph";
 
 const llm = new ChatGroq({
   model: "mixtral-8x7b-32768",
-
-  apiKey: process.env.GROQ_API_KEY, // Ensure it's set in .env
-
+  apiKey: process.env.GROQ_API_KEY,
   temperature: 0,
 });
 
-const promptTemplate = ` 
+// Helper function to sanitize and parse JSON response
+const sanitizeAndParseJSON = (response: string): any[] => {
+  try {
+    // Remove any potential code block markers
+    let cleaned = response.replace(/```json\n?|\n?```/g, "");
+    
+    // Remove any control characters
+    cleaned = cleaned.replace(/[\x00-\x1F\x7F-\x9F]/g, "");
+    
+    // Ensure the response starts with [ and ends with ]
+    cleaned = cleaned.trim();
+    if (!cleaned.startsWith("[")) cleaned = "[" + cleaned;
+    if (!cleaned.endsWith("]")) cleaned = cleaned + "]";
+    
+    // Parse the cleaned JSON
+    const parsed = JSON.parse(cleaned);
+    return Array.isArray(parsed) ? parsed : [parsed];
+  } catch (error) {
+    console.error("JSON parsing error:", error);
+    console.log("Attempted to parse:", response);
+    throw new Error("Failed to parse LLM response");
+  }
+};
 
-[ 
+const callModel = async (state: typeof MessagesAnnotation.State) => {
+  const response = await llm.invoke(state.messages);
+  return { messages: response };
+};
 
- { 
+const workflow = new StateGraph(MessagesAnnotation)
+  .addNode("model", callModel)
+  .addEdge(START, "model")
+  .addEdge("model", END);
 
- "role": "system", 
+const memory = new MemorySaver();
+const app = workflow.compile({ checkpointer: memory });
 
- "content": "{systemContent}" 
+const promptTemplate = `
+System: For the following context: {systemContent}
+Generate interview questions and answers in the following JSON format ONLY:
+[
+  {
+    "question": "your question here",
+    "answer": "your answer here"
+  }
+]
+Ensure the response is valid JSON with no special characters or line breaks in strings.
 
- }, 
-
- { 
-
- "role": "user", 
-
- "content": "{userContent}" 
-
- } 
-
-] 
-
+User: {userContent}
 `;
 
 export async function POST(request: Request) {
   try {
-    // Parse form data
-
     const formData = await request.formData();
-
     const interviewType = formData.get("interviewType") as string;
-
     const role = formData.get("role") as string;
-
     const experience = formData.get("experience") as string;
-
-    const resumeFile = formData.get("resume") as File; // Authenticate user
-
+    const resumeFile = formData.get("resume") as File;
+    const newMockId = uuidv4();
     const { userId } = await auth();
-
     const user = await currentUser();
-
     if (!userId || !user?.emailAddresses?.[0]?.emailAddress) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    let cleanedResponse;
+    let llmResponse;
 
     if (interviewType === "resume" && resumeFile) {
-      // Convert file to base64
-
       const arrayBuffer = await resumeFile.arrayBuffer();
-
       const base64Pdf = Buffer.from(arrayBuffer).toString("base64");
 
       const resumePrompt = [
         {
           role: "system",
-
-          content:
-            "Analyze the following resume and generate 2 relevant interview questions along with answers.",
+          content: "Analyze the following resume and generate 2 relevant interview questions with answers in valid JSON format: [{'question': '...', 'answer': '...'}]",
         },
-
         { role: "user", content: base64Pdf },
-      ]; // Invoke LLM
+      ];
 
-      const result = await llm.invoke(resumePrompt);
-
-      cleanedResponse =
-        typeof result.content === "string"
-          ? result.content.replace(/```json\n?|\n?```/g, "")
-          : "";
+      const result = await app.invoke(
+        { messages: resumePrompt },
+        { configurable: { thread_id: uuidv4() } }
+      );
+      llmResponse = result.messages[result.messages.length - 1].content;
     } else {
-      let inputPrompt = "";
+      const systemContent = interviewType === "technical" 
+        ? `Role: ${role}, Experience Level: ${experience}. Generate 1 technical interview question.`
+        : `Experience Level: ${experience}. Generate 1 HR interview question.`;
 
-      if (interviewType === "technical") {
-        inputPrompt = ` 
-
- ${promptTemplate.replace(
-          "{systemContent}",
-
-          `Role: ${role}, Experience Level: ${experience}`
-        )} 
-
- . Generate 1 technical interview question and a brief answer. Format response as JSON: [{"question":"...","answer":"..."}] strictly give as json inside list with [] 
-
-`;
-      } else {
-        inputPrompt = ` 
-
- ${promptTemplate.replace(
-          "{systemContent}",
-
-          `Experience Level: ${experience}`
-        )} 
-
- . Generate 1 HR interview question with a detailed answer. Format response as JSON: [{"question":"...","answer":"..."}] 
-
-`;
-      } // Invoke LLM
-
-      const result = await llm.invoke([{ role: "user", content: inputPrompt }]);
-
-      cleanedResponse =
-        typeof result?.content === "string"
-          ? result.content.replace(/```json\n?|\n?```/g, "")
-          : "";
-    } // Validate cleaned response
-
-    if (!cleanedResponse) {
-      return Response.json(
-        { error: "Failed to generate interview questions" },
-
-        { status: 500 }
+      const inputPrompt = promptTemplate
+        .replace("{systemContent}", systemContent)
+        .replace("{userContent}", "Generate the interview question now.");
+      
+      const result = await app.invoke(
+        { messages: [{ role: "user", content: inputPrompt }] },
+        { configurable: { thread_id: newMockId } }
       );
-    } // Ensure the response is a valid JSON array
 
-    let jsonResponse = [];
+      llmResponse = result.messages[result.messages.length - 1].content;
+      console.log(memory.storage)
+      console.log(result)
+    }
+    
+    // Parse and validate the LLM response
+    const jsonResponse = sanitizeAndParseJSON(llmResponse as string);
 
-    try {
-      jsonResponse = JSON.parse(cleanedResponse);
-
-      if (!Array.isArray(jsonResponse)) {
-        jsonResponse = [jsonResponse]; // Ensure it's always an array
-      }
-    } catch (error) {
-      console.error("Failed to parse JSON response:", error);
-
-      return Response.json(
-        { error: "Invalid JSON response from LLM" },
-
-        { status: 500 }
-      );
-    } // Generate a unique mock interview ID
-
-    const newMockId = uuidv4(); // Prepare data for database insertion
-
+    // Generate mock interview ID and prepare data
+    
     const insertData = {
       mockId: newMockId,
-
-      jsonMockResp: JSON.stringify(jsonResponse), // Store as stringified JSON
-
-      jobPosition:
-        role ||
-        (interviewType === "resume" ? "Resume Interview" : "HR Interview"),
-
+      jsonMockResp: JSON.stringify(jsonResponse),
+      jobPosition: role || (interviewType === "resume" ? "Resume Interview" : "HR Interview"),
       jobType: interviewType,
-
       jobExperience: experience,
-
       createdBy: user.emailAddresses[0].emailAddress,
-
       createdAt: moment().format("DD-MM-YYYY"),
-    }; // Insert into database
+    };
 
     const resp = await db
-
       .insert(MockInterview)
-
       .values(insertData)
-
-      .returning({ mockId: MockInterview.mockId }); // Return the mock interview ID
+      .returning({ mockId: MockInterview.mockId });
 
     return Response.json({ mockId: resp[0].mockId });
   } catch (error) {
     console.error("Error creating interview:", error);
-
-    return Response.json({ error: "Internal server error" }, { status: 500 });
+    return Response.json(
+      { error: "Failed to create interview. Please try again." },
+      { status: 500 }
+    );
   }
 }
 
 export async function GET() {
   try {
     const { userId } = await auth();
-
     const user = await currentUser();
 
     if (!userId || !user?.emailAddresses?.[0]?.emailAddress) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userEmail = user.emailAddresses[0].emailAddress; // Get the interviews
+    const userEmail = user.emailAddresses[0].emailAddress;
 
+    // Get the interviews
     const interviews = await db
-
       .select()
-
       .from(MockInterview)
-
       .where(eq(MockInterview.createdBy, userEmail))
+      .orderBy(desc(MockInterview.createdAt));
 
-      .orderBy(desc(MockInterview.createdAt)); // Calculate average rating
-
+    // Calculate average rating
     const averageRating = await db
-
       .select({
         averageScore: avg(UserAnswer.rating),
       })
-
       .from(UserAnswer)
-
       .where(eq(UserAnswer.userEmail, userEmail));
 
     let formattedAverageScore = "0.0";
-
     const avgScore = averageRating[0]?.averageScore;
-
     if (avgScore !== null && avgScore !== undefined) {
       formattedAverageScore = Number(avgScore).toFixed(1);
     }
 
     return Response.json({
       interviews,
-
       stats: {
         completedInterviews: interviews.length,
-
         averageScore: formattedAverageScore,
-
         totalHours: "12.5",
-
         upcomingSessions: "3",
       },
     });
   } catch (error) {
     console.error("Error fetching interviews:", error);
-
     return Response.json({ error: "Internal server error" }, { status: 500 });
   }
 }
