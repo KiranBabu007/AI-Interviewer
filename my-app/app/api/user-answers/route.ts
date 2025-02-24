@@ -104,9 +104,6 @@ Answer: "${userAnswer}"
     // Generate Next Question using LangChain
     // ------------------------
     const nextQuestionPrompt = `
-You are conducting a ${interviewData.jobType.toLowerCase()} interview for a ${interviewData.jobExperience} ${interviewData.jobPosition} position.
-Previous Q&A:
-Q: "${mockInterviewQuestion[activeQuestionIndex]?.question}"
 A: "${userAnswer}"
 Generate one follow-up interview question and model answer.
 Return only JSON: {"question": "string", "answer": "string"}
