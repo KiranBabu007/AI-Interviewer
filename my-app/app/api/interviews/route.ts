@@ -77,10 +77,9 @@ export async function POST(request: Request) {
     const role = formData.get("role") as string;
     const experience = formData.get("experience") as string;
     const resumeFile = formData.get("resume") as File;
-
+    const newMockId = uuidv4();
     const { userId } = await auth();
     const user = await currentUser();
-
     if (!userId || !user?.emailAddresses?.[0]?.emailAddress) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -112,19 +111,22 @@ export async function POST(request: Request) {
       const inputPrompt = promptTemplate
         .replace("{systemContent}", systemContent)
         .replace("{userContent}", "Generate the interview question now.");
-
+      
       const result = await app.invoke(
         { messages: [{ role: "user", content: inputPrompt }] },
-        { configurable: { thread_id: uuidv4() } }
+        { configurable: { thread_id: newMockId } }
       );
-      llmResponse = result.messages[result.messages.length - 1].content;
-    }
 
+      llmResponse = result.messages[result.messages.length - 1].content;
+      console.log(memory.storage)
+      console.log(result)
+    }
+    
     // Parse and validate the LLM response
     const jsonResponse = sanitizeAndParseJSON(llmResponse as string);
 
     // Generate mock interview ID and prepare data
-    const newMockId = uuidv4();
+    
     const insertData = {
       mockId: newMockId,
       jsonMockResp: JSON.stringify(jsonResponse),
