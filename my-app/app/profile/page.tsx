@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useUser } from "@clerk/nextjs";
 import Image from 'next/image';
 import GroupedInterviewList from '@/components/GroupedInterviewList';
+import { Barchart } from '@/components/ui/barchart';
 
 const Page = () => {
   const { isLoaded, isSignedIn, user } = useUser();
@@ -28,16 +29,6 @@ const Page = () => {
       label: 'Average Score',
       value: `${stats.averageScore}/10`,
       icon: Activity 
-    },
-    { 
-      label: 'Total Hours',
-      value: stats.totalHours,
-      icon: FileText 
-    },
-    { 
-      label: 'Upcoming Sessions',
-      value: stats.upcomingSessions,
-      icon: Bell 
     }
   ];
 
@@ -105,7 +96,7 @@ const Page = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-6 mb-12">
           {userStats.map((stat, index) => (
             <Card key={index} className="bg-white/5 hover:bg-white/10 transition-colors duration-200 border-0">
               <CardContent className="p-6">
@@ -139,34 +130,11 @@ const Page = () => {
           </div>
 
           {/* Recent Activity */}
-          <Card className="bg-white/5 border-0">
-            <CardHeader className="p-6">
-              <CardTitle className="text-xl text-white flex items-center gap-3">
-                <Activity className="w-6 h-6" />
-                Recent Activity
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 pt-0">
-              <div className="space-y-6">
-                {[
-                  { icon: Bell, text: "Interview reminder set for tomorrow", time: "2h ago" },
-                  { icon: FileText, text: "Resume updated with new experience", time: "5h ago" },
-                  { icon: Settings, text: "Profile settings changed", time: "1d ago" }
-                ].map((item, index) => (
-                  <div key={index} className="flex items-start gap-4 text-gray-300">
-                    <div className="p-2 rounded-full bg-white/10 mt-1">
-                      <item.icon className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-white">{item.text}</p>
-                      <p className="text-xs text-gray-500 mt-1">{item.time}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <div>
+          <Barchart averageScore={parseFloat(stats.averageScore)} />
         </div>
+        </div>
+        
       </main>
     </div>
   );
