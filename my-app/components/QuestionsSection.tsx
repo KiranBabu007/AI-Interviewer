@@ -12,15 +12,11 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
+import Hls from 'hls.js';
 
 interface QuestionsSectionProps {
   mockInterviewQuestion: { question: string }[];
   activeQuestionIndex: number;
-}
-
-interface Config {
-  simliAPIKey: string;
-  faceId: string;
 }
 
 const QuestionsSection: React.FC<QuestionsSectionProps> = ({
@@ -28,57 +24,59 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
   activeQuestionIndex,
 }) => {
   const router = useRouter();
+  const [videoUrl, setVideoUrl] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
-  // Ref to store the currently playing audio instance
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const hlsRef = useRef<Hls | null>(null);
 
-  const CONFIG: Config = {
+  // Configure your API keys and face ID
+  const CONFIG = {
+    ttsAPIKey: process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY || '',
     simliAPIKey: process.env.NEXT_PUBLIC_SIMLI_API_KEY || '',
-    faceId: 'tmp9i8bbq7c',
+    faceId: 'tmp9i8bbq7c', // Replace with your preferred face ID
   };
 
-  /**
-   * Calls our API route to generate TTS audio from the given text,
-   * then creates a Blob URL and plays it.
-   */
-  const generateTextToSpeechAudio = async (text: string) => {
-    if (!text) return;
-
+  const generateAvatarVideo = async (text: string) => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/text-to-speech', {
+      const response = await fetch('https://api.simli.ai/textToVideoStream', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({
+          ...CONFIG,
+          requestBody: {
+            audioProvider: 'ElevenLabs',
+            text: text,
+            voiceName: 'pMsXgVXv3BLzUgSXRplE',
+            model_id: 'eleven_turbo_v2',
+            voice_settings: {
+              stability: 0.1,
+              similarity_boost: 0.3,
+              style: 0.2
+            }
+          }
+        }),
+        redirect: "follow", // Allow redirects
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to generate audio: ${response.statusText}`);
+        throw new Error(`HTTP Error ${response.status}: ${response.statusText}`);
       }
 
-      const blob = await response.blob();
-      const audioUrl = URL.createObjectURL(blob);
+      const data = await response.json();
 
-      // If there's already an audio playing, stop it and revoke its URL.
-      if (audioRef.current) {
-        audioRef.current.pause();
-        URL.revokeObjectURL(audioRef.current.src);
+      if (!data.hls_url) {
+        throw new Error('Invalid response: hls_url missing');
       }
 
-      const audio = new Audio(audioUrl);
-      audioRef.current = audio;
-      await audio.play();
-
-      // Clean up the blob URL after playing
-      audio.onended = () => {
-        URL.revokeObjectURL(audioUrl);
-        audioRef.current = null;
-      };
+      // Ensure the URL uses HTTPS
+      const fixedUrl = data.hls_url.replace(/^http:/, 'https:');
+      setVideoUrl(fixedUrl);
     } catch (error) {
-      console.error('Error generating TTS audio:', error);
-      // Fallback to browser speech synthesis
+      console.error('Error generating avatar video:', error);
+      // Fallback to text-to-speech if avatar video fails
       if ("speechSynthesis" in window) {
         const speech = new SpeechSynthesisUtterance(text);
         window.speechSynthesis.speak(speech);
@@ -88,19 +86,71 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
     }
   };
 
-  // Effect to automatically play TTS when question changes or component mounts
   useEffect(() => {
-    generateTextToSpeechAudio(mockInterviewQuestion[activeQuestionIndex]?.question);
+    if (hlsRef.current) {
+      hlsRef.current.destroy();
+      hlsRef.current = null;
+    }
+    setVideoUrl('');
+  }, [activeQuestionIndex]);
 
-    // Cleanup function to stop audio when the component unmounts
+  useEffect(() => {
+    if (!videoRef.current || !videoUrl) return;
+
+    if (Hls.isSupported()) {
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+      }
+
+      const hls = new Hls({
+        maxBufferLength: 30,
+        maxMaxBufferLength: 60,
+        maxBufferSize: 60 * 1000 * 1000,
+        maxBufferHole: 0.5,
+        lowLatencyMode: true,
+        backBufferLength: 30
+      });
+
+      hlsRef.current = hls;
+      hls.loadSource(videoUrl);
+      hls.attachMedia(videoRef.current);
+
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        videoRef.current?.play().catch(console.error);
+      });
+
+      hls.on(Hls.Events.ERROR, (event, data) => {
+        if (data.fatal) {
+          switch (data.type) {
+            case Hls.ErrorTypes.NETWORK_ERROR:
+              console.log('Network error, trying to recover...');
+              hls.startLoad();
+              break;
+            case Hls.ErrorTypes.MEDIA_ERROR:
+              console.log('Media error, trying to recover...');
+              hls.recoverMediaError();
+              break;
+            default:
+              console.error('Fatal error, destroying HLS instance:', data);
+              hls.destroy();
+              break;
+          }
+        }
+      });
+    } else if (videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
+      videoRef.current.src = videoUrl;
+      videoRef.current.addEventListener('loadedmetadata', () => {
+        videoRef.current?.play().catch(console.error);
+      });
+    }
+
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-        audioRef.current = null;
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
       }
     };
-  }, [mockInterviewQuestion[activeQuestionIndex]?.question]);
+  }, [videoUrl]);
 
   return mockInterviewQuestion ? (
     <div className="p-5 z-10 rounded-lg my-10">
@@ -126,22 +176,33 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
         </AlertDialog>
       </div>
 
-      {/* Centered large volume button */}
-      <div className="flex flex-col items-center my-5">
-      <h2 className="text-md md:text-lg text-white">
+      
+
+      <div className="my-5">
+        {videoUrl ? (
+          <div className="relative w-full aspect-video max-w-lg mx-auto mb-5">
+            <video
+              ref={videoRef}
+              className="rounded-lg w-full h-full"
+              controls
+              playsInline
+              autoPlay
+            >
+              Your browser does not support HLS video playback.
+            </video>
+          </div>
+        ) : (
+          <h2 className="text-md md:text-lg text-white">
             {mockInterviewQuestion[activeQuestionIndex]?.question}
           </h2>
-        <Volume2 
-          size={80} // Increase the icon size
-          className={`cursor-pointer bg-black text-white rounded-full p-4 ${isLoading ? 'opacity-50' : ''}`}
-          onClick={() =>
-            !isLoading &&
-            generateTextToSpeechAudio(mockInterviewQuestion[activeQuestionIndex]?.question)
-          } 
-        />
-        {isLoading && <span className="mt-2 text-sm text-gray-400"></span>}
-      </div>
+        )}
 
+        <Volume2 
+          className={`cursor-pointer bg-black text-white ${isLoading ? 'opacity-50 mt-5' : ''}`}
+          onClick={() => !isLoading && generateAvatarVideo(mockInterviewQuestion[activeQuestionIndex]?.question)} 
+        />
+        {isLoading && <span className="ml-2 text-sm text-gray-400">Generating avatar response...</span>}
+      </div>
       <div className="border rounded-lg p-5 opacity-70 bg-gray-100 mt-20">
         <h2 className="flex gap-2 items-center text-primary">
           <Lightbulb />

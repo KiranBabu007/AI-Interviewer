@@ -12,10 +12,11 @@ import {
   StateGraph,
   MemorySaver,
 } from "@langchain/langgraph";
+import { chatSession } from "@/utils/GeminiAiModel";
 
 const llm = new ChatGroq({
   model: "mixtral-8x7b-32768",
-  apiKey: process.env.GROQ_API_KEY,
+  apiKey: process.env.NEXT_PUBLIC_GROQ_API_KEY,
   temperature: 0,
 });
 
@@ -83,26 +84,31 @@ export async function POST(request: Request) {
     if (!userId || !user?.emailAddresses?.[0]?.emailAddress) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
-
+    
     let llmResponse;
+    let cleanedResponse;
+    let jsonResponse: any[] = [];
+    if (interviewType === 'resume' && resumeFile) {
+        // Convert the uploaded file to ArrayBuffer and then to base64
+        const arrayBuffer = await resumeFile.arrayBuffer();
+        const base64Pdf = Buffer.from(arrayBuffer).toString("base64");
 
-    if (interviewType === "resume" && resumeFile) {
-      const arrayBuffer = await resumeFile.arrayBuffer();
-      const base64Pdf = Buffer.from(arrayBuffer).toString("base64");
+        // Create the prompt for resume analysis
+        const resumePrompt = {
+            inlineData: {
+                data: base64Pdf,
+                mimeType: "application/pdf"
+            }
+        };
 
-      const resumePrompt = [
-        {
-          role: "system",
-          content: "Analyze the following resume and generate 2 relevant interview questions with answers in valid JSON format: [{'question': '...', 'answer': '...'}]",
-        },
-        { role: "user", content: base64Pdf },
-      ];
-
-      const result = await app.invoke(
-        { messages: resumePrompt },
-        { configurable: { thread_id: uuidv4() } }
-      );
-      llmResponse = result.messages[result.messages.length - 1].content;
+        // Send both the PDF data and the instruction prompt
+        const result = await chatSession.sendMessage([
+            resumePrompt,
+            'Based on this resume, generate 2 relevant interview questions and their sample answers that assess the candidate\'s experience and skills. Format the response as a JSON array: [{"question":"...","answer":"..."},{"question":"...","answer":"..."}]'
+        ]);
+        
+        cleanedResponse = result.response.text().replace(/```json\n?|\n?```/g, '');
+        console.log(cleanedResponse)
     } else {
       const systemContent = interviewType === "technical" 
         ? `Role: ${role}, Experience Level: ${experience}. Generate 1 technical interview question.`
@@ -120,16 +126,15 @@ export async function POST(request: Request) {
       llmResponse = result.messages[result.messages.length - 1].content;
       console.log(memory.storage)
       console.log(result)
+      jsonResponse = sanitizeAndParseJSON(llmResponse as string);
     }
-    
-    // Parse and validate the LLM response
-    const jsonResponse = sanitizeAndParseJSON(llmResponse as string);
 
-    // Generate mock interview ID and prepare data
+    // Parse and validate the LLM response                                      
     
+    // Generate mock interview ID and prepare data
     const insertData = {
       mockId: newMockId,
-      jsonMockResp: JSON.stringify(jsonResponse),
+      jsonMockResp: (interviewType === "resume" ? cleanedResponse : JSON.stringify(jsonResponse)),
       jobPosition: role || (interviewType === "resume" ? "Resume Interview" : "HR Interview"),
       jobType: interviewType,
       jobExperience: experience,
