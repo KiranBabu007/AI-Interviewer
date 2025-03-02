@@ -7,10 +7,14 @@ import { desc, eq, avg } from "drizzle-orm";
 import { chatSession } from "@/utils/GeminiAiModel";
 import { app } from "@/utils/sharedMemory";
 
-
+// Define an interface for your question-answer structure
+interface QuestionAnswer {
+  question: string;
+  answer: string;
+}
 
 // Helper function to sanitize and parse JSON response
-const sanitizeAndParseJSON = (response: string): any[] => {
+const sanitizeAndParseJSON = (response: string): QuestionAnswer[] => {
   try {
     // Remove any potential code block markers
     let cleaned = response.replace(/```json\n?|\n?```/g, "");
@@ -66,7 +70,7 @@ export async function POST(request: Request) {
     
     let llmResponse;
     let cleanedResponse;
-    let jsonResponse: any[] = [];    // Generate a random number between 1 and 100 to induce randomness.
+    let jsonResponse: QuestionAnswer[] = [];    // Generate a random number between 1 and 100 to induce randomness.
     const randomNumber = Math.floor(Math.random() * 100) + 1;
     const timestampSeed = Date.now();
 

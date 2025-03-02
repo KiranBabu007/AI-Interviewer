@@ -29,7 +29,7 @@ export function Barchart({ averageScore = 0 }) {
     audio: 0,
     behavior: 0
   });
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
     async function fetchAnalysisData() {
@@ -46,7 +46,7 @@ export function Barchart({ averageScore = 0 }) {
       } catch (error) {
         console.error('Error fetching analysis data:', error);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     }
     
@@ -68,27 +68,33 @@ export function Barchart({ averageScore = 0 }) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer
-          config={chartConfig}
-          className="bg-black p-4 rounded-xl"
-        >
-          <BarChart accessibilityLayer data={chartData}>
-            <CartesianGrid stroke="rgba(255, 255, 255, 0.2)" />
-            <XAxis
-              dataKey="month"
-              tickLine={false}
-              tickMargin={10}
-              axisLine={false}
-              tick={{ fill: "white" }}
-              tickFormatter={(value) => value}
-            />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
-            />
-            <Bar dataKey="desktop" fill="white" radius={8} />
-          </BarChart>
-        </ChartContainer>
+        {isLoading ? (
+          <div className="flex items-center justify-center h-40 text-gray-400">
+            Loading analysis data...
+          </div>
+        ) : (
+          <ChartContainer
+            config={chartConfig}
+            className="bg-black p-4 rounded-xl"
+          >
+            <BarChart accessibilityLayer data={chartData}>
+              <CartesianGrid stroke="rgba(255, 255, 255, 0.2)" />
+              <XAxis
+                dataKey="month"
+                tickLine={false}
+                tickMargin={10}
+                axisLine={false}
+                tick={{ fill: "white" }}
+                tickFormatter={(value) => value}
+              />
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent hideLabel />}
+              />
+              <Bar dataKey="desktop" fill="white" radius={8} />
+            </BarChart>
+          </ChartContainer>
+        )}
       </CardContent>
     </Card>
   );

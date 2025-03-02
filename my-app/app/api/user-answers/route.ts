@@ -6,10 +6,22 @@ import { eq } from 'drizzle-orm';
 import moment from 'moment';
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { app } from '@/utils/sharedMemory';
-import { StructuredTool } from '@langchain/core/tools'; // Add this import for tools
+// Removed unused StructuredTool import
+
+// Define interfaces for the JSON structures
+interface FeedbackResponse {
+  rating: number;
+  feedback: string;
+  tags: Record<string, number>;
+}
+
+interface QuestionAnswer {
+  question: string;
+  answer: string;
+}
 
 // Enhanced JSON parsing function
-const extractAndParseJSON = (response: string): any => {
+const extractAndParseJSON = (response: string): QuestionAnswer => {
   try {
     // Step 1: Remove code blocks and markdown formatting
     let cleaned = response.replace(/```(?:json)?|```/g, "");
@@ -90,7 +102,7 @@ Return only JSON: {"rating": 1-10, "feedback": "brief feedback", "tags": {"skill
     const feedbackResult = await chatSession.sendMessage(feedbackPrompt);
     const feedbackLLMText = (await feedbackResult.response.text())
       .replace(/```json\n?|\n?```/g, '');
-    const JsonFeedbackResp = JSON.parse(feedbackLLMText);
+    const JsonFeedbackResp = JSON.parse(feedbackLLMText) as FeedbackResponse;
     
     // 2. Store user's answer in memory thread with context about the question
     
@@ -165,7 +177,7 @@ Return only valid JSON in this format: {"question": "your follow-up question", "
     }
 
     // Handle tags
-    let existingTags = {};
+    let existingTags: Record<string, number> = {};
     if (currentMock[0].tags) {
       try {
         existingTags = JSON.parse(currentMock[0].tags);
