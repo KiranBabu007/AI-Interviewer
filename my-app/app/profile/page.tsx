@@ -1,8 +1,8 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
-import { Settings, User, Calendar, Bell, Activity, FileText } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { User, Calendar, Activity } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { useUser } from "@clerk/nextjs";
 import Image from 'next/image';
 import GroupedInterviewList from '@/components/GroupedInterviewList';
