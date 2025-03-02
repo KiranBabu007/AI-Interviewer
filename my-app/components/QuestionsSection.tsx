@@ -19,12 +19,6 @@ interface QuestionsSectionProps {
   activeQuestionIndex: number;
 }
 
-interface Config {
-  ttsAPIKey: string;
-  simliAPIKey: string;
-  faceId: string;
-}
-
 const QuestionsSection: React.FC<QuestionsSectionProps> = ({
   mockInterviewQuestion,
   activeQuestionIndex,
@@ -32,23 +26,18 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
   const router = useRouter();
   const [videoUrl, setVideoUrl] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
-  const [showVideo, setShowVideo] = useState(false);
-  const [loadingProgress, setLoadingProgress] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const preloadVideoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
-  const preloadHlsRef = useRef<Hls | null>(null);
-  const bufferCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const CONFIG: Config = {
+  // Configure your API keys and face ID
+  const CONFIG = {
     ttsAPIKey: process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY || '',
     simliAPIKey: process.env.NEXT_PUBLIC_SIMLI_API_KEY || '',
-    faceId: 'tmp9i8bbq7c',
+    faceId: 'tmp9i8bbq7c', // Replace with your preferred face ID
   };
 
   const generateAvatarVideo = async (text: string) => {
     setIsLoading(true);
-    setShowVideo(false);
     try {
       const response = await fetch('https://api.simli.ai/textToVideoStream', {
         method: 'POST',
@@ -68,12 +57,26 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
               style: 0.2
             }
           }
-        })
+        }),
+        redirect: "follow", // Allow redirects
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP Error ${response.status}: ${response.statusText}`);
+      }
+
       const data = await response.json();
-      setVideoUrl(data.hls_url);
+
+      if (!data.hls_url) {
+        throw new Error('Invalid response: hls_url missing');
+      }
+
+      // Ensure the URL uses HTTPS
+      const fixedUrl = data.hls_url.replace(/^http:/, 'https:');
+      setVideoUrl(fixedUrl);
     } catch (error) {
       console.error('Error generating avatar video:', error);
+      // Fallback to text-to-speech if avatar video fails
       if ("speechSynthesis" in window) {
         const speech = new SpeechSynthesisUtterance(text);
         window.speechSynthesis.speak(speech);
@@ -83,144 +86,74 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
     }
   };
 
-  const checkBufferStatus = () => {
-    if (!preloadVideoRef.current) return;
-    
-    const video = preloadVideoRef.current;
-    const buffered = video.buffered;
-    
-    if (buffered.length > 0) {
-      const duration = video.duration;
-      const bufferedEnd = buffered.end(buffered.length - 1);
-      const bufferedStart = buffered.start(0);
-      
-      const bufferPercentage = (bufferedEnd / duration) * 100;
-      setLoadingProgress(Math.min(bufferPercentage, 100));
-
-      // Check if video is fully buffered
-      if (bufferedEnd >= duration - 0.5 && bufferedStart <= 0.5) {
-        if (bufferCheckIntervalRef.current) {
-          clearInterval(bufferCheckIntervalRef.current);
-          bufferCheckIntervalRef.current = null;
-        }
-        
-        // Now we can show the actual video player
-        setShowVideo(true);
-        if (videoRef.current) {
-          videoRef.current.currentTime = 0;
-          videoRef.current.play().catch(console.error);
-        }
-      }
-    }
-  };
-
-  useEffect(() => {
-    return () => {
-      if (bufferCheckIntervalRef.current) {
-        clearInterval(bufferCheckIntervalRef.current);
-      }
-      if (hlsRef.current) {
-        hlsRef.current.destroy();
-      }
-      if (preloadHlsRef.current) {
-        preloadHlsRef.current.destroy();
-      }
-    };
-  }, []);
-  
   useEffect(() => {
     if (hlsRef.current) {
       hlsRef.current.destroy();
       hlsRef.current = null;
     }
-    if (preloadHlsRef.current) {
-      preloadHlsRef.current.destroy();
-      preloadHlsRef.current = null;
-    }
     setVideoUrl('');
-    setShowVideo(false);
-    setLoadingProgress(0);
   }, [activeQuestionIndex]);
 
   useEffect(() => {
-    if (!videoUrl) return;
+    if (!videoRef.current || !videoUrl) return;
 
     if (Hls.isSupported()) {
-      // Setup preload video
-      if (preloadHlsRef.current) {
-        preloadHlsRef.current.destroy();
-      }
-
-      const preloadHls = new Hls({
-        maxBufferLength: 60,
-        maxMaxBufferLength: 600,
-        maxBufferSize: 600 * 1000 * 1000,
-        maxBufferHole: 0.1,
-        lowLatencyMode: false,
-        backBufferLength: 90,
-        enableWorker: true,
-        startPosition: 0,
-        debug: false
-      });
-
-      preloadHlsRef.current = preloadHls;
-      if (preloadVideoRef.current) {
-        preloadHls.loadSource(videoUrl);
-        preloadHls.attachMedia(preloadVideoRef.current);
-      }
-
-      preloadHls.on(Hls.Events.MANIFEST_PARSED, () => {
-        if (bufferCheckIntervalRef.current) {
-          clearInterval(bufferCheckIntervalRef.current);
-        }
-        bufferCheckIntervalRef.current = setInterval(checkBufferStatus, 1000);
-      });
-
-      // Setup main video player
       if (hlsRef.current) {
         hlsRef.current.destroy();
       }
 
       const hls = new Hls({
-        maxBufferLength: 60,
-        maxMaxBufferLength: 600,
-        maxBufferSize: 600 * 1000 * 1000,
-        maxBufferHole: 0.1,
-        lowLatencyMode: false,
-        backBufferLength: 90,
-        enableWorker: true,
-        startPosition: 0,
-        debug: false
+        maxBufferLength: 30,
+        maxMaxBufferLength: 60,
+        maxBufferSize: 60 * 1000 * 1000,
+        maxBufferHole: 0.5,
+        lowLatencyMode: true,
+        backBufferLength: 30
       });
 
       hlsRef.current = hls;
-      if (videoRef.current) {
-        hls.loadSource(videoUrl);
-        hls.attachMedia(videoRef.current);
-      }
+      hls.loadSource(videoUrl);
+      hls.attachMedia(videoRef.current);
 
-    } else if (videoRef.current?.canPlayType('application/vnd.apple.mpegurl')) {
-      // Fallback for Safari
-      if (preloadVideoRef.current) preloadVideoRef.current.src = videoUrl;
-      if (videoRef.current) videoRef.current.src = videoUrl;
-      if (bufferCheckIntervalRef.current) {
-        clearInterval(bufferCheckIntervalRef.current);
-      }
-      bufferCheckIntervalRef.current = setInterval(checkBufferStatus, 1000);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        videoRef.current?.play().catch(console.error);
+      });
+
+      hls.on(Hls.Events.ERROR, (event, data) => {
+        if (data.fatal) {
+          switch (data.type) {
+            case Hls.ErrorTypes.NETWORK_ERROR:
+              console.log('Network error, trying to recover...');
+              hls.startLoad();
+              break;
+            case Hls.ErrorTypes.MEDIA_ERROR:
+              console.log('Media error, trying to recover...');
+              hls.recoverMediaError();
+              break;
+            default:
+              console.error('Fatal error, destroying HLS instance:', data);
+              hls.destroy();
+              break;
+          }
+        }
+      });
+    } else if (videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
+      videoRef.current.src = videoUrl;
+      videoRef.current.addEventListener('loadedmetadata', () => {
+        videoRef.current?.play().catch(console.error);
+      });
     }
 
+    return () => {
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+    };
   }, [videoUrl]);
 
   return mockInterviewQuestion ? (
     <div className="p-5 z-10 rounded-lg my-10">
-      {/* Hidden preload video element */}
-      <video
-        ref={preloadVideoRef}
-        className="hidden"
-        preload="auto"
-        muted
-      />
-
       <div className="mb-5">
         <AlertDialog>
           <AlertDialogTrigger className="h-9 px-6 text-sm bg-red-700 text-white rounded-lg hover:bg-red-800 z-50">
@@ -248,22 +181,9 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
       <div className="my-5">
         {videoUrl ? (
           <div className="relative w-full aspect-video max-w-lg mx-auto mb-5">
-            {!showVideo ? (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 rounded-lg">
-                <div className="text-white mb-2">
-                  Thinking... {Math.round(loadingProgress)}%
-                </div>
-                <div className="w-64 h-2 bg-gray-700 rounded-full">
-                  <div 
-                    className="h-full bg-blue-500 rounded-full transition-all duration-300"
-                    style={{ width: `${loadingProgress}%` }}
-                  />
-                </div>
-              </div>
-            ) : null}
             <video
               ref={videoRef}
-              className={`rounded-lg w-full h-full ${!showVideo ? 'hidden' : ''}`}
+              className="rounded-lg w-full h-full"
               controls
               playsInline
               autoPlay
@@ -278,12 +198,11 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
         )}
 
         <Volume2 
-          className={`cursor-pointer bg-black text-white ${isLoading ? 'opacity-50' : ''}`}
+          className={`cursor-pointer bg-black text-white ${isLoading ? 'opacity-50 mt-5' : ''}`}
           onClick={() => !isLoading && generateAvatarVideo(mockInterviewQuestion[activeQuestionIndex]?.question)} 
         />
         {isLoading && <span className="ml-2 text-sm text-gray-400">Generating avatar response...</span>}
       </div>
-
       <div className="border rounded-lg p-5 opacity-70 bg-gray-100 mt-20">
         <h2 className="flex gap-2 items-center text-primary">
           <Lightbulb />
