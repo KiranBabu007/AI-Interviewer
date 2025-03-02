@@ -93,17 +93,7 @@ Return only JSON: {"rating": 1-10, "feedback": "brief feedback", "tags": {"skill
     const JsonFeedbackResp = JSON.parse(feedbackLLMText);
     
     // 2. Store user's answer in memory thread with context about the question
-    await app.invoke(
-      { 
-        messages: [
-          { 
-            role: "user", 
-            content: `My answer to the question "${mockInterviewQuestion[activeQuestionIndex]?.question}": ${userAnswer}` 
-          }
-        ] 
-      },
-      { configurable: { thread_id: conversationThreadId } }
-    );
+    
 
     // 3. Generate next question with rich context
     const jobContext = {
