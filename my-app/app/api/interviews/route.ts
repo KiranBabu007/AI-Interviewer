@@ -13,10 +13,11 @@ import {
   MemorySaver,
 } from "@langchain/langgraph";
 import { chatSession } from "@/utils/GeminiAiModel";
+import { app } from "@/utils/sharedMemory";
 
 const llm = new ChatGroq({
   model: "mixtral-8x7b-32768",
-  apiKey: process.env.GROQ_API_KEY,
+  apiKey: process.env.NEXT_PUBLIC_GROQ_API_KEY,
   temperature: 1.2,
 });
 
@@ -55,7 +56,6 @@ const workflow = new StateGraph(MessagesAnnotation)
   .addEdge("model", END);
 
 const memory = new MemorySaver();
-const app = workflow.compile({ checkpointer: memory });
 
 const promptTemplate = `
 System: For the following context: {systemContent}
@@ -128,8 +128,7 @@ export async function POST(request: Request) {
       );
 
       llmResponse = result.messages[result.messages.length - 1].content;
-      console.log(memory.storage);
-      console.log(result);
+      jsonResponse=sanitizeAndParseJSON(llmResponse)
     }
 
     // Parse and validate the LLM response                                      
@@ -150,7 +149,10 @@ export async function POST(request: Request) {
       .values(insertData)
       .returning({ mockId: MockInterview.mockId });
 
-    return Response.json({ mockId: resp[0].mockId });
+    return Response.json({ 
+      mockId: resp[0].mockId,
+      threadId: newMockId // Explicitly return the threadId for future use
+    });
   } catch (error) {
     console.error("Error creating interview:", error);
     return Response.json(

@@ -40,7 +40,7 @@ const AddInterview = () => {
   
       const response = await fetch('/api/interviews', {
         method: 'POST',
-        body: formData // Remove the Content-Type header to let the browser set it
+        body: formData
       });
   
       const data = await response.json();
@@ -49,11 +49,17 @@ const AddInterview = () => {
         throw new Error(data.error || 'Something went wrong');
       }
   
+      // Store IDs for future use
+      localStorage.setItem('currentThreadId', data.threadId);
+      localStorage.setItem('currentMockId', data.mockId);
+      
+      // Redirect to the interview page with the mockId
+      router.push(`/dashboard/interview/${data.mockId}`);
+      
       setOpen(false);
-      router.push('/dashboard/interview/' + data.mockId);
     } catch (error) {
-      console.error('Error creating interview:', error);
-      alert('Failed to start interview. Please try again.');
+      console.error("Interview setup error:", error);
+      
     } finally {
       setLoading(false);
     }
