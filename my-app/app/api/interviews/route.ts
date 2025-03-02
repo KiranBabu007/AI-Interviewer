@@ -4,22 +4,10 @@ import { v4 as uuidv4 } from "uuid";
 import moment from "moment";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { desc, eq, avg } from "drizzle-orm";
-import { ChatGroq } from "@langchain/groq";
-import {
-  START,
-  END,
-  MessagesAnnotation,
-  StateGraph,
-  MemorySaver,
-} from "@langchain/langgraph";
 import { chatSession } from "@/utils/GeminiAiModel";
 import { app } from "@/utils/sharedMemory";
 
-const llm = new ChatGroq({
-  model: "mixtral-8x7b-32768",
-  apiKey: process.env.NEXT_PUBLIC_GROQ_API_KEY,
-  temperature: 1.2,
-});
+
 
 // Helper function to sanitize and parse JSON response
 const sanitizeAndParseJSON = (response: string): any[] => {
@@ -45,17 +33,8 @@ const sanitizeAndParseJSON = (response: string): any[] => {
   }
 };
 
-const callModel = async (state: typeof MessagesAnnotation.State) => {
-  const response = await llm.invoke(state.messages);
-  return { messages: response };
-};
 
-const workflow = new StateGraph(MessagesAnnotation)
-  .addNode("model", callModel)
-  .addEdge(START, "model")
-  .addEdge("model", END);
 
-const memory = new MemorySaver();
 
 const promptTemplate = `
 System: For the following context: {systemContent}
