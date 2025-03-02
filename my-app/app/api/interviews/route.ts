@@ -16,7 +16,7 @@ import {
 const llm = new ChatGroq({
   model: "mixtral-8x7b-32768",
   apiKey: process.env.GROQ_API_KEY,
-  temperature: 0,
+  temperature: 1.2,
 });
 
 // Helper function to sanitize and parse JSON response
@@ -85,6 +85,9 @@ export async function POST(request: Request) {
     }
 
     let llmResponse;
+    // Generate a random number between 1 and 100 to induce randomness.
+    const randomNumber = Math.floor(Math.random() * 100) + 1;
+    const timestampSeed = Date.now();
 
     if (interviewType === "resume" && resumeFile) {
       const arrayBuffer = await resumeFile.arrayBuffer();
@@ -104,9 +107,10 @@ export async function POST(request: Request) {
       );
       llmResponse = result.messages[result.messages.length - 1].content;
     } else {
+      // Append the random number to induce a different question each time.
       const systemContent = interviewType === "technical" 
-        ? `Role: ${role}, Experience Level: ${experience}. Generate 1 technical interview question.`
-        : `Experience Level: ${experience}. Generate 1 HR interview question.`;
+  ? `Role: ${role}, Experience Level: ${experience}. Use seed ${randomNumber}-${timestampSeed} to randomly select 1 technical interview question from the question bank.`
+  : `Experience Level: ${experience}. Use seed ${randomNumber}-${timestampSeed} to randomly select 1 HR interview question from the question bank.`;
 
       const inputPrompt = promptTemplate
         .replace("{systemContent}", systemContent)
@@ -118,15 +122,14 @@ export async function POST(request: Request) {
       );
 
       llmResponse = result.messages[result.messages.length - 1].content;
-      console.log(memory.storage)
-      console.log(result)
+      console.log(memory.storage);
+      console.log(result);
     }
     
     // Parse and validate the LLM response
     const jsonResponse = sanitizeAndParseJSON(llmResponse as string);
 
     // Generate mock interview ID and prepare data
-    
     const insertData = {
       mockId: newMockId,
       jsonMockResp: JSON.stringify(jsonResponse),

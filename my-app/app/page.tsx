@@ -4,6 +4,7 @@ import Landing from '@/components/Landing'
 import AboutUs from '@/components/About'
 import HowItWorks  from '@/components/HowItWorks'
 import Navbar from '@/components/Navbar'
+import Footer from '@/components/Footer'
 
 const Page = () => {
   const aboutRef = useRef<HTMLDivElement>(null);
@@ -17,7 +18,7 @@ const Page = () => {
     howItWorksRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
   return (
-    <div>
+    <div className="overflow-auto scrollbar-hide">
     <Navbar onAboutClick={scrollToAboutUs} onHowItWorksClick={scrollToHowItWorks} />
     <Landing />
     <div ref={aboutRef}>
@@ -26,6 +27,7 @@ const Page = () => {
     <div ref={howItWorksRef}>
         <HowItWorks />
       </div>
+    <div><Footer/></div>
   </div>
   )
 }
