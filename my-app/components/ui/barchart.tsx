@@ -1,13 +1,12 @@
 "use client";
 
-import { TrendingUp } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -18,20 +17,48 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 
-
 const chartConfig = {
   desktop: {
-    label: "Desktop",
+    label: "Score",
     color: "hsl(var(--chart-3))",
   },
 } satisfies ChartConfig;
 
 export function Barchart({ averageScore = 0 }) {
-    const chartData = [
-        { month: "Knowledge", desktop: averageScore },
-        { month: "Audio", desktop: 4 },
-        { month: "Behavior", desktop: 2.5 },
-      ];
+  const [scores, setScores] = useState({
+    audio: 0,
+    behavior: 0
+  });
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    async function fetchAnalysisData() {
+      try {
+        const response = await fetch('/api/profile-analysis');
+        const data = await response.json();
+        
+        if (response.ok && data.averageScores) {
+          setScores({
+            audio: data.averageScores.audio || 0,
+            behavior: data.averageScores.behavior || 0
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching analysis data:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    fetchAnalysisData();
+  }, []);
+
+  const chartData = [
+    { month: "Knowledge", desktop: averageScore },
+    { month: "Audio", desktop: scores.audio },
+    { month: "Behavior", desktop: scores.behavior },
+  ];
+      
   return (
     <Card className="bg-black text-white">
       <CardHeader>
@@ -46,25 +73,23 @@ export function Barchart({ averageScore = 0 }) {
           className="bg-black p-4 rounded-xl"
         >
           <BarChart accessibilityLayer data={chartData}>
-            <CartesianGrid stroke="rgba(255, 255, 255, 0.2)" />{" "}
-            {/* Light white grid */}
+            <CartesianGrid stroke="rgba(255, 255, 255, 0.2)" />
             <XAxis
               dataKey="month"
               tickLine={false}
               tickMargin={10}
               axisLine={false}
-              tick={{ fill: "white" }} // Make month labels white
+              tick={{ fill: "white" }}
               tickFormatter={(value) => value}
             />
             <ChartTooltip
               cursor={false}
               content={<ChartTooltipContent hideLabel />}
             />
-            <Bar dataKey="desktop" fill="white" radius={8} /> {/* White bars */}
+            <Bar dataKey="desktop" fill="white" radius={8} />
           </BarChart>
         </ChartContainer>
       </CardContent>
-      
     </Card>
   );
 }
