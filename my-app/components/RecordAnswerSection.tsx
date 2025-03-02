@@ -140,7 +140,9 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({
 
   const UpdateUserAnswer = useCallback(async () => {
     setLoading(true);
+
     try {
+      const threadId=localStorage.getItem('currentThreadId');
       const response = await fetch('/api/user-answers', {
         method: 'POST',
         headers: {
@@ -151,7 +153,8 @@ const RecordAnswerSection: React.FC<RecordAnswerSectionProps> = ({
           activeQuestionIndex,
           interviewData,
           userAnswer,
-          userEmail: user?.primaryEmailAddress?.emailAddress
+          userEmail: user?.primaryEmailAddress?.emailAddress,
+          threadId
         })
       });
 

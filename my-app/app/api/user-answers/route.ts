@@ -5,54 +5,59 @@ import { UserAnswer, MockInterview } from '@/utils/schema';
 import { eq } from 'drizzle-orm';
 import moment from 'moment';
 import { auth, currentUser } from '@clerk/nextjs/server';
+import { app } from '@/utils/sharedMemory';
+import { StructuredTool } from '@langchain/core/tools'; // Add this import for tools
 
-// ------------------------
-// LangChain Setup (only for Next Question)
-// ------------------------
-import { ChatGroq } from "@langchain/groq";
-import { START, END, MessagesAnnotation, StateGraph, MemorySaver } from "@langchain/langgraph";
-
-// Initialize LangChain's ChatGroq instance
-const llm = new ChatGroq({
-  model: "mixtral-8x7b-32768",
-  apiKey: process.env.NEXT_PUBLIC_GROQ_API_KEY,
-  temperature: 0,
-});
-
-// Helper function to sanitize and parse JSON responses
-const sanitizeAndParseJSON = (response: string): any[] => {
+// Enhanced JSON parsing function
+const extractAndParseJSON = (response: string): any => {
   try {
-    let cleaned = response.replace(/```json\n?|\n?```/g, "");
-    cleaned = cleaned.replace(/[\x00-\x1F\x7F-\x9F]/g, "");
-    cleaned = cleaned.trim();
-    if (!cleaned.startsWith("[")) cleaned = "[" + cleaned;
-    if (!cleaned.endsWith("]")) cleaned = cleaned + "]";
-    const parsed = JSON.parse(cleaned);
-    return Array.isArray(parsed) ? parsed : [parsed];
+    // Step 1: Remove code blocks and markdown formatting
+    let cleaned = response.replace(/```(?:json)?|```/g, "");
+    
+    // Step 2: Find the first { and last } to extract just the JSON object
+    const firstBrace = cleaned.indexOf('{');
+    const lastBrace = cleaned.lastIndexOf('}');
+    
+    if (firstBrace === -1 || lastBrace === -1) {
+      throw new Error("No JSON object found in response");
+    }
+    
+    cleaned = cleaned.substring(firstBrace, lastBrace + 1);
+    
+    // Step 3: Fix common JSON issues
+    // Replace single quotes with double quotes
+    cleaned = cleaned.replace(/(\w+)\'(\w+)/g, '$1\\\'$2'); // Preserve apostrophes in words
+    cleaned = cleaned.replace(/\'([^']*)\'/g, '"$1"');      // Replace quotes around strings
+    
+    // Fix trailing commas
+    cleaned = cleaned.replace(/,\s*}/g, '}');
+    cleaned = cleaned.replace(/,\s*\]/g, ']');
+    
+    // Step 4: Attempt to parse
+    return JSON.parse(cleaned);
   } catch (error) {
     console.error("JSON parsing error:", error);
-    console.log("Attempted to parse:", response);
-    throw new Error("Failed to parse LLM response");
+    console.log("Raw response:", response);
+    
+    // Step 5: Fallback extraction using regex
+    try {
+      const questionMatch = response.match(/"question":\s*"([^"]+)"/);
+      const answerMatch = response.match(/"answer":\s*"([^"]+)"/);
+      
+      if (questionMatch && answerMatch) {
+        return {
+          question: questionMatch[1],
+          answer: answerMatch[1]
+        };
+      }
+      
+      throw new Error("Regex extraction failed");
+    } catch (regexError) {
+      console.error("Regex extraction error:", regexError);
+      throw new Error("Failed to parse LLM response");
+    }
   }
 };
-
-// Function to invoke the LLM using LangChain
-const callModel = async (state: typeof MessagesAnnotation.State) => {
-  const response = await llm.invoke(state.messages);
-  return { messages: response };
-};
-
-// Create a state graph workflow for LangChain
-const workflow = new StateGraph(MessagesAnnotation)
-  .addNode("model", callModel)
-  .addEdge(START, "model")
-  .addEdge("model", END);
-
-const memory = new MemorySaver();
-const app = workflow.compile({ checkpointer: memory });
-// ------------------------
-// End LangChain Setup
-// ------------------------
 
 export async function POST(request: Request) {
   try {
@@ -67,74 +72,86 @@ export async function POST(request: Request) {
       mockInterviewQuestion, 
       activeQuestionIndex, 
       interviewData, 
-      userAnswer 
+      userAnswer,
+      threadId
     } = req;
 
-    // ------------------------
-    // Generate Feedback using chatSession (unchanged)
-    // ------------------------
+    const conversationThreadId = threadId;
+
+    // 1. Generate feedback
     const feedbackPrompt = `
-Evaluate the quality of the following interview response based on relevance, accuracy, depth, and clarity. 
-
-- Rate the response on a scale of 1-10 (1 = poor, 10 = excellent).
-- Provide a brief, constructive feedback sentence.
-- Identify key skills assessed in the response and assign each a score from 0-100.
-
-Return only JSON in the following format:
-{
-  "rating": number,
-  "feedback": "string",
-  "tags": { "skill1": score, "skill2": score, ... }
-}
-
+Evaluate the quality of the following interview response:
 Question: "${mockInterviewQuestion[activeQuestionIndex]?.question}" 
 Answer: "${userAnswer}"
+
+Return only JSON: {"rating": 1-10, "feedback": "brief feedback", "tags": {"skill1": score, ...}}
     `;
   
     const feedbackResult = await chatSession.sendMessage(feedbackPrompt);
     const feedbackLLMText = (await feedbackResult.response.text())
-      .replace('```json', '')
-      .replace('```', '');
+      .replace(/```json\n?|\n?```/g, '');
     const JsonFeedbackResp = JSON.parse(feedbackLLMText);
-    // ------------------------
-    // End Feedback Generation
-    // ------------------------
-
-    // ------------------------
-    // Generate Next Question using LangChain
-    // ------------------------
-    const nextQuestionPrompt = `
-A: "${userAnswer}"
-Generate one follow-up interview question and model answer.
-Return only JSON: {"question": "string", "answer": "string"}
-    `;
     
-    // Use interviewData.mockId as the thread_id for session continuity
-    const nextQuestionResult = await app.invoke(
-      { messages: [{ role: "user", content: nextQuestionPrompt }] },
-      { configurable: { thread_id: interviewData.mockId } }
+    // 2. Store user's answer in memory thread with context about the question
+    await app.invoke(
+      { 
+        messages: [
+          { 
+            role: "user", 
+            content: `My answer to the question "${mockInterviewQuestion[activeQuestionIndex]?.question}": ${userAnswer}` 
+          }
+        ] 
+      },
+      { configurable: { thread_id: conversationThreadId } }
     );
-    
-    // --- Fix: Ensure we extract a string from the LangChain message content ---
-    const lastMessage = nextQuestionResult.messages[nextQuestionResult.messages.length - 1];
-    let nextLLMResponse: string;
-    if (typeof lastMessage.content === 'string') {
-      nextLLMResponse = lastMessage.content;
-    } else if (Array.isArray(lastMessage.content)) {
-      nextLLMResponse = lastMessage.content.join('');
-    } else {
-      nextLLMResponse = String(lastMessage.content);
-    }
-    
-    const parsedResponse = sanitizeAndParseJSON(nextLLMResponse);
-    const nextQuestion = Array.isArray(parsedResponse) ? parsedResponse[0] : parsedResponse;
-    // ------------------------
-    // End Next Question Generation
-    // ------------------------
 
-    // ------------------------
-    // Insert User Answer Data & Update Interview Record
-    // ------------------------
+    // 3. Generate next question with rich context
+    const jobContext = {
+      position: interviewData.jobPosition,
+      type: interviewData.jobType,
+      experience: interviewData.jobExperience
+    };
+
+    // Combined approach - record answer and generate next question in one call
+    const combinedPrompt = `
+The candidate has answered the previous question:
+"${mockInterviewQuestion[activeQuestionIndex]?.question}"
+
+Their answer was:
+"${userAnswer}"
+
+You are conducting a ${jobContext.type} interview for a ${jobContext.position} position at ${jobContext.experience} experience level.
+
+Based on this answer and our previous conversation:
+1. Identify areas that need deeper exploration
+2. Progress logically through the interview (don't repeat similar questions)
+3. Adjust difficulty based on answer quality
+4. Ensure questions are relevant to the ${jobContext.position} role
+
+Generate the next logical interview question.
+
+Return only valid JSON in this format: {"question": "your follow-up question", "answer": "expected detailed answer"}
+`;
+
+    const result = await app.invoke({
+      messages: [
+        { role: "system", content: "You are an expert interviewer evaluating a job candidate." },
+        { role: "user", content: combinedPrompt }
+      ],
+    }, { configurable: { thread_id: conversationThreadId } });
+    
+    // Extract and parse the response
+    const lastMessage = result.messages[result.messages.length - 1];
+    const nextLLMResponse = typeof lastMessage.content === 'string' 
+      ? lastMessage.content 
+      : Array.isArray(lastMessage.content) 
+        ? lastMessage.content.join('') 
+        : String(lastMessage.content);
+    
+    const parsedResponse = extractAndParseJSON(nextLLMResponse);
+    const nextQuestion = Array.isArray(parsedResponse) ? parsedResponse[0] : parsedResponse;
+    
+    // 4. Save user answer to database
     const insertData = {
       mockIdRef: interviewData.mockId,
       question: mockInterviewQuestion[activeQuestionIndex].question,
@@ -147,21 +164,23 @@ Return only JSON: {"question": "string", "answer": "string"}
     };
     await db.insert(UserAnswer).values(insertData);
 
+    // 5. Update interview tags and questions
     const currentMock = await db.select()
       .from(MockInterview)
-      .where(eq(MockInterview.mockId, interviewData.mockId));
+      .where(eq(MockInterview.mockId, interviewData.mockId))
+      .limit(1);
 
     if (currentMock.length === 0) {
       throw new Error('Mock interview not found');
     }
 
+    // Handle tags
     let existingTags = {};
     if (currentMock[0].tags) {
       try {
         existingTags = JSON.parse(currentMock[0].tags);
       } catch (error) {
         console.error('Error parsing tags:', error);
-        existingTags = {};
       }
     }
 
@@ -174,29 +193,25 @@ Return only JSON: {"question": "string", "answer": "string"}
       }
     }
 
-    await db.update(MockInterview)
-      .set({
-        tags: JSON.stringify(existingTags)
-      })
-      .where(eq(MockInterview.mockId, interviewData.mockId));
-
+    // Append new question to existing ones
     const currentQuestions = JSON.parse(currentMock[0].jsonMockResp);
     currentQuestions.push(nextQuestion);
     
+    // Update database in a single operation
     await db.update(MockInterview)
       .set({
+        tags: JSON.stringify(existingTags),
         jsonMockResp: JSON.stringify(currentQuestions)
       })
       .where(eq(MockInterview.mockId, interviewData.mockId));
-    // ------------------------
-    // End Database Updates
-    // ------------------------
 
+    // 6. Return simplified response
     return NextResponse.json({ 
-      message: "User Answer Recorded Successfully",
+      success: true,
+      message: "Answer processed and next question saved",
       feedback: JsonFeedbackResp,
-      nextQuestion: nextQuestion
-    }, { status: 200 });
+      // No need to return nextQuestion since the frontend will get it from get-question API
+    });
     
   } catch (error) {
     console.error('Error processing interview answer:', error);

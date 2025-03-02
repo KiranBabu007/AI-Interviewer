@@ -4,21 +4,10 @@ import { v4 as uuidv4 } from "uuid";
 import moment from "moment";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { desc, eq, avg } from "drizzle-orm";
-import { ChatGroq } from "@langchain/groq";
-import {
-  START,
-  END,
-  MessagesAnnotation,
-  StateGraph,
-  MemorySaver,
-} from "@langchain/langgraph";
 import { chatSession } from "@/utils/GeminiAiModel";
+import { app } from "@/utils/sharedMemory";
 
-const llm = new ChatGroq({
-  model: "mixtral-8x7b-32768",
-  apiKey: process.env.NEXT_PUBLIC_GROQ_API_KEY,
-  temperature: 0,
-});
+
 
 // Helper function to sanitize and parse JSON response
 const sanitizeAndParseJSON = (response: string): any[] => {
@@ -44,18 +33,8 @@ const sanitizeAndParseJSON = (response: string): any[] => {
   }
 };
 
-const callModel = async (state: typeof MessagesAnnotation.State) => {
-  const response = await llm.invoke(state.messages);
-  return { messages: response };
-};
 
-const workflow = new StateGraph(MessagesAnnotation)
-  .addNode("model", callModel)
-  .addEdge(START, "model")
-  .addEdge("model", END);
 
-const memory = new MemorySaver();
-const app = workflow.compile({ checkpointer: memory });
 
 const promptTemplate = `
 System: For the following context: {systemContent}
@@ -87,7 +66,10 @@ export async function POST(request: Request) {
     
     let llmResponse;
     let cleanedResponse;
-    let jsonResponse: any[] = [];
+    let jsonResponse: any[] = [];    // Generate a random number between 1 and 100 to induce randomness.
+    const randomNumber = Math.floor(Math.random() * 100) + 1;
+    const timestampSeed = Date.now();
+
     if (interviewType === 'resume' && resumeFile) {
         // Convert the uploaded file to ArrayBuffer and then to base64
         const arrayBuffer = await resumeFile.arrayBuffer();
@@ -110,9 +92,10 @@ export async function POST(request: Request) {
         cleanedResponse = result.response.text().replace(/```json\n?|\n?```/g, '');
         console.log(cleanedResponse)
     } else {
+      // Append the random number to induce a different question each time.
       const systemContent = interviewType === "technical" 
-        ? `Role: ${role}, Experience Level: ${experience}. Generate 1 technical interview question.`
-        : `Experience Level: ${experience}. Generate 1 HR interview question.`;
+  ? `Role: ${role}, Experience Level: ${experience}. Use seed ${randomNumber}-${timestampSeed} to randomly select 1 technical interview question from the question bank.`
+  : `Experience Level: ${experience}. Use seed ${randomNumber}-${timestampSeed} to randomly select 1 HR interview question from the question bank.`;
 
       const inputPrompt = promptTemplate
         .replace("{systemContent}", systemContent)
@@ -124,9 +107,7 @@ export async function POST(request: Request) {
       );
 
       llmResponse = result.messages[result.messages.length - 1].content;
-      console.log(memory.storage)
-      console.log(result)
-      jsonResponse = sanitizeAndParseJSON(llmResponse as string);
+      jsonResponse=sanitizeAndParseJSON(llmResponse)
     }
 
     // Parse and validate the LLM response                                      
@@ -147,7 +128,10 @@ export async function POST(request: Request) {
       .values(insertData)
       .returning({ mockId: MockInterview.mockId });
 
-    return Response.json({ mockId: resp[0].mockId });
+    return Response.json({ 
+      mockId: resp[0].mockId,
+      threadId: newMockId // Explicitly return the threadId for future use
+    });
   } catch (error) {
     console.error("Error creating interview:", error);
     return Response.json(
