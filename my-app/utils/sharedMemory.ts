@@ -12,7 +12,7 @@ export const sharedMemory = new MemorySaver();
 
 // Initialize the LLM
 export const llm = new ChatGroq({
-  model: "mixtral-8x7b-32768", 
+  model: "mistral-saba-24",
   apiKey: process.env.NEXT_PUBLIC_GROQ_API_KEY,
   temperature: 1.2,
 });
