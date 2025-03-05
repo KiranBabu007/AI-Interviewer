@@ -130,7 +130,7 @@ Based on this answer and our previous conversation:
 3. Adjust difficulty based on answer quality
 4. Ensure questions are relevant to the ${jobContext.position} role
 
-Generate the next logical interview question.
+Generate the next logical interview question. Note:Don't ask coding questions.
 
 Return only valid JSON in this format: {"question": "your follow-up question", "answer": "expected detailed answer"}
 `;
