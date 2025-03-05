@@ -9,6 +9,8 @@ import Footer from '@/components/Footer'
 const Page = () => {
   const aboutRef = useRef<HTMLDivElement>(null);
   const howItWorksRef = useRef<HTMLDivElement>(null);
+  const homeRef = useRef<HTMLDivElement>(null);
+  const activeSection = 'home'; // or any logic to determine the active section
 
   const scrollToAboutUs = () => {
     aboutRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -19,16 +21,24 @@ const Page = () => {
   };
   return (
     <div className="overflow-auto scrollbar-hide">
-    <Navbar onAboutClick={scrollToAboutUs} onHowItWorksClick={scrollToHowItWorks} />
-    <Landing />
-    <div ref={aboutRef}>
-      <AboutUs />
-    </div>
-    <div ref={howItWorksRef}>
+      <Navbar 
+        onAboutClick={scrollToAboutUs} 
+        onHowItWorksClick={scrollToHowItWorks} 
+        activeSection={activeSection}
+      />
+      {/* Add a spacer div to push content down */}
+      <div className="h-16"></div>
+      <div ref={homeRef}>
+        <Landing />
+      </div>
+      <div ref={aboutRef}>
+        <AboutUs />
+      </div>
+      <div ref={howItWorksRef}>
         <HowItWorks />
       </div>
-    <div><Footer/></div>
-  </div>
+      <div><Footer/></div>
+    </div>
   )
 }
 
