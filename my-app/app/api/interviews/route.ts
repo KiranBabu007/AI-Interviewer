@@ -90,7 +90,7 @@ export async function POST(request: Request) {
         // Send both the PDF data and the instruction prompt
         const result = await chatSession.sendMessage([
             resumePrompt,
-            'Based on this resume, generate 2 relevant interview questions and their sample answers that assess the candidate\'s experience and skills. Format the response as a JSON array: [{"question":"...","answer":"..."},{"question":"...","answer":"..."}]'
+            'Based on this resume, generate 2 relevant interview questions and their sample answers that assess the candidate\'s experience and skills. Format the response as a JSON array: [{"question":"...","answer":"..."},{"question":"...","answer":"..."}] Note:Dont ask coding questions.'
         ]);
         
         cleanedResponse = result.response.text().replace(/```json\n?|\n?```/g, '');
@@ -98,7 +98,7 @@ export async function POST(request: Request) {
     } else {
       // Append the random number to induce a different question each time.
       const systemContent = interviewType === "technical" 
-  ? `Role: ${role}, Experience Level: ${experience}. Use seed ${randomNumber}-${timestampSeed} to randomly select 1 technical interview question from the question bank.`
+  ? `Role: ${role}, Experience Level: ${experience}. Use seed ${randomNumber}-${timestampSeed} to randomly select 1 technical interview question from the question bank. Note:Don't ask coding questions.`
   : `Experience Level: ${experience}. Use seed ${randomNumber}-${timestampSeed} to randomly select 1 HR interview question from the question bank.`;
 
       const inputPrompt = promptTemplate

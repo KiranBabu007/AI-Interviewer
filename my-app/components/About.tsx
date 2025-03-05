@@ -1,7 +1,9 @@
 import React from "react";
 import { BackgroundLines } from "@/components/ui/background-lines";
 import { AnimatedTooltip } from "./ui/animated-tooltip";
-
+import sidharthImage from "@/public/sid.webp";
+import indrajithImage from "@/public/indra.webp";
+import kiranImage from "@/public/kiran.webp";
 const AboutUs = () => {
 
 const people = [
@@ -9,26 +11,19 @@ const people = [
     id: 1,
     name: "Sidharth Manikuttan",
     designation: "Software Engineer",
-    image:
-      "https://media.licdn.com/dms/image/v2/D5603AQHYc-kTlfUOMA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1721754297801?e=1740009600&v=beta&t=SorNbDX0Oh1CeeAFiWQIaGVgFy3SYPqIG8vVXgORk5E",
+    image: sidharthImage.src
   },{
     id: 2,
     name: "Indrajith S Nair",
     designation: "Software Engineer",
-    image:
-      "https://media.licdn.com/dms/image/v2/D5603AQHwPX97jgSJpA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1689488177062?e=1740009600&v=beta&t=ZI4HBMRlmahYgZZuWCPhmESL8O_uLsp7_zpE2y4KlJw",
+    image:indrajithImage.src
   },
   {
     id: 3,
     name: "Kiran Babu",
     designation: "Software Engineer",
-    image:
-      "https://media.licdn.com/dms/image/v2/D5603AQHzwPub7LODng/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1732730797258?e=1740009600&v=beta&t=PL-DrRTl5X4BPLZ-M3r9b9zAtfiZjEHLcEG6BpW8ZOE",
+    image:kiranImage.src
   },
-  
-  
-
-
 ];
 
   return (
