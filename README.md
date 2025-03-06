@@ -5,8 +5,7 @@ AI Interviewer is a web-based platform designed to help users practice and impro
 ## Features
 
 - **Mock Interviews**: Simulate real interview environments with AI-driven question generation.
-- **Facial Recognition**: Ensure user identity and track attention during the interview.
-- **Screen Monitoring**: Prevent tab switching to maintain focus.
+
 - **Behavioral Analysis**: Analyze user responses to provide feedback on strengths and areas for improvement.
 - **Dynamic Question Generation**: Generate questions based on user-selected job roles or topics.
 - **Real-time Feedback**: Provide instant feedback on performance after each interview session.
