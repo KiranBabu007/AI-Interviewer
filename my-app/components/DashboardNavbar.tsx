@@ -4,14 +4,14 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
-import { Menu, X, ArrowLeft, Settings, Grid } from "lucide-react";
+import { Menu, X, ArrowLeft, Settings, Grid, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-
+import { useRouter } from "next/navigation";
 const DashboardNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
-
+  const router = useRouter();
   // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
@@ -77,13 +77,39 @@ const DashboardNavbar = () => {
               </div>
             </Link>
             <div className="relative">
-              <UserButton afterSignOutUrl="/" />
+            <UserButton afterSignOutUrl="/" 
+                  appearance={{
+                    elements: {
+                      avatarBox: "h-9 w-9" // Increased from default size
+                    }
+                  }}>
+                <UserButton.MenuItems>
+                  <UserButton.Action
+                    label="User Dashboard"
+                    labelIcon={<User size={18} color="white" />}
+                    onClick={() => router.push("/profile")}
+                  />
+                </UserButton.MenuItems>
+              </UserButton>
             </div>
           </div>
           
           {/* Mobile menu button */}
           <div className="flex md:hidden items-center space-x-2">
-            <UserButton afterSignOutUrl="/" />
+          <UserButton afterSignOutUrl="/" 
+                  appearance={{
+                    elements: {
+                      avatarBox: "h-9 w-9" // Increased from default size
+                    }
+                  }}>
+                <UserButton.MenuItems>
+                  <UserButton.Action
+                    label="User Dashboard"
+                    labelIcon={<User size={18} color="white" />}
+                    onClick={() => router.push("/profile")}
+                  />
+                </UserButton.MenuItems>
+              </UserButton>
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="p-2 rounded-md bg-gray-800 hover:bg-gray-700"
