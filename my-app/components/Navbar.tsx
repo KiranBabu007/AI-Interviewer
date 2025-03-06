@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
-import { Menu, X, Home, Info, HelpCircle } from "lucide-react";
+import { Menu, X, Home, Info, HelpCircle, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-
+import { useRouter } from "next/navigation"
 // Define available sections for typing
 type ActiveSection = "home" | "about" | "howItWorks" | null;
 
@@ -22,7 +22,7 @@ const Navbar = ({
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
-
+  const router = useRouter();
   const isHomePage = pathname === "/";
 
   // Handle scroll effect
@@ -135,14 +135,20 @@ const Navbar = ({
             <div className="relative group">
               <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-300"></div>
               <div className="relative p-0.5"> {/* Added padding for larger appearance */}
-                <UserButton 
-                  afterSignOutUrl="/" 
+              <UserButton afterSignOutUrl="/" 
                   appearance={{
                     elements: {
                       avatarBox: "h-9 w-9" // Increased from default size
                     }
-                  }}
-                />
+                  }}>
+                <UserButton.MenuItems>
+                  <UserButton.Action
+                    label="User Dashboard"
+                    labelIcon={<User size={18} color="white" />}
+                    onClick={() => router.push("/profile")}
+                  />
+                </UserButton.MenuItems>
+              </UserButton>
               </div>
             </div>
           </div>
@@ -150,14 +156,20 @@ const Navbar = ({
           {/* Mobile Menu Button */}
           <div className="flex md:hidden items-center">
             <div className="mr-3"> {/* Increased margin */}
-              <UserButton 
-                afterSignOutUrl="/" 
-                appearance={{
-                  elements: {
-                    avatarBox: "h-8 w-8" // Increased from default size
-                  }
-                }}
-              />
+            <UserButton afterSignOutUrl="/" 
+                  appearance={{
+                    elements: {
+                      avatarBox: "h-9 w-9" // Increased from default size
+                    }
+                  }}>
+                <UserButton.MenuItems>
+                  <UserButton.Action
+                    label="User Dashboard"
+                    labelIcon={<User size={18} color="white" />}
+                    onClick={() => router.push("/profile")}
+                  />
+                </UserButton.MenuItems>
+              </UserButton>
             </div>
             
             <motion.button

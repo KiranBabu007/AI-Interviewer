@@ -63,7 +63,7 @@ const Page = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black bg-grid-white/[0.2] relative">
+    <div className="min-h-screen bg-black bg-grid-white/[0.2] relative mt-10">
       <div className="absolute pointer-events-none inset-0 flex bg-black [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
       <Navbar />
       
