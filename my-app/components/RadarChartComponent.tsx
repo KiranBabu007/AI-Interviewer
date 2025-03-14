@@ -168,7 +168,7 @@ export function RadarChartComponent() {
   return (
     <Card>
       <CardHeader className="items-center">
-        <CardTitle>Behavioral Analysis</CardTitle>
+        <CardTitle>Overall Analysis</CardTitle>
         <CardDescription>
           Showing scores for key behavioral metrics
         </CardDescription>
