@@ -51,7 +51,7 @@ const content = [
       "Receive a detailed evaluation report immediately after your interview. Get insights on your strengths, areas for improvement, and specific recommendations to enhance your interview performance.",
     content: (
       <div className="h-full w-full bg-[linear-gradient(to_bottom_right,var(--red-500),var(--pink-500))] flex items-center justify-center text-white">
-        <Image src="/report.jpg" width={400} height={400} alt="" className="rounded-lg"/>
+        <Image src="/report2.png" width={400} height={400} alt="" className="rounded-lg"/>
       </div>
     ),
   }
