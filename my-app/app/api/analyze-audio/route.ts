@@ -26,7 +26,7 @@ export async function POST(request: Request) {
       `Analyze this interview response audio clip for the following question: "${question}"\n` +
       `Provide a detailed evaluation covering:\n` +
       `1. Content analysis (relevance, completeness)\n` +
-      `2. Communication style (clarity, tone, pace)\n` +
+      `2. Communication style (clarity, tone, pace,vocabulary)\n` +
       `3. Professional demeanor (confidence, language use)\n` +
       `4. Areas for improvement\n` +
       `5. Overall rating (1-10)\n` +

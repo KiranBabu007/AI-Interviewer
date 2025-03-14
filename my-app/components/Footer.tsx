@@ -2,7 +2,10 @@ import { Facebook, Github, Linkedin, Twitter } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="bg-gradient-to-b from-gray-200 to-gray-100 text-black py-6 shadow-lg">
+    <>
+    <div className={`h-0.5 bg-gradient-to-r from-blue-600 via-purple-500 to-pink-500 transition-all duration-300`} />
+    <footer className="bg-black text-white py-6 shadow-lg">
+      
       <div className="container mx-auto px-6 flex flex-col md:flex-row items-center justify-between">
         {/* Brand & Copyright */}
         <div className="text-center md:text-left">
@@ -41,5 +44,6 @@ export default function Footer() {
         </div>
       </div>
     </footer>
+    </>
   );
 }
