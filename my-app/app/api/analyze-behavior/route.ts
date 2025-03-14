@@ -44,7 +44,7 @@ export async function POST(request: Request) {
       `1. Posture analysis (sitting position, alignment)\n` +
       `2. Facial expressions (engagement, attentiveness)\n` +
       `3. Body language (professionalism, confidence)\n` +
-      `4. Specific recommendations for improvement\n` +
+      `4. Specific recommendations for improvement in paragraph\n` +
       `5. Overall confidence score (1-10)\n` +
       `Return only JSON: {
         "postureAnalysis": "string",
