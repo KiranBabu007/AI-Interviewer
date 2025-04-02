@@ -43,16 +43,6 @@ const technicalTopics: TechnicalTopics = {
     junior: ["Python Basics", "Data Structures", "Basic Algorithms", "Package Management", "Testing Basics"],
     mid: ["Advanced Python", "Web Frameworks", "Database Integration", "API Development", "Testing Strategies"],
     senior: ["System Architecture", "Performance Optimization", "ML Integration", "Team Leadership", "Best Practices"]
-  },
-  "designer": {
-    junior: ["Design Principles", "UI Fundamentals", "Tool Proficiency", "Typography", "Color Theory"],
-    mid: ["UX Research", "Design Systems", "Prototyping", "User Testing", "Accessibility"],
-    senior: ["Design Leadership", "Design Strategy", "Team Management", "Design Operations", "Innovation"]
-  },
-  "manager": {
-    junior: ["Project Management", "Team Coordination", "Basic Agile", "Resource Planning", "Risk Management"],
-    mid: ["Team Leadership", "Stakeholder Management", "Advanced Agile", "Process Improvement", "Performance Management"],
-    senior: ["Strategic Planning", "Organization Leadership", "Change Management", "Enterprise Architecture", "Innovation Management"]
   }
 };
 
@@ -148,7 +138,7 @@ export async function POST(request: Request) {
     let cleanedResponse;
     let jsonResponse: QuestionAnswer[] = [];    // Generate a random number between 1 and 100 to induce randomness.
     const randomNumber = Math.floor(Math.random() * 100) + 1;
-    const timestampSeed = Date.now();
+   
 
     if (interviewType === 'resume' && resumeFile) {
         // Convert the uploaded file to ArrayBuffer and then to base64

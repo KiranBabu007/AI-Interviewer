@@ -145,8 +145,7 @@ const AddInterview = () => {
                       <SelectItem value="front end developer">Frontend Developer</SelectItem>
                       <SelectItem value="backend developer">Backend Developer</SelectItem>
                       <SelectItem value="python developer">Python Developer</SelectItem>
-                      <SelectItem value="designer">Designer</SelectItem>
-                      <SelectItem value="manager">Manager</SelectItem>
+                      
                     </SelectContent>
                   </Select>
 
