@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from "recharts";
+import { PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart } from "recharts";
 import {
   Card,
   CardContent,
@@ -114,27 +114,27 @@ export function RadarChartComponent() {
           const scaledData: ChartDataPoint[] = [
             { 
               category: "Posture", 
-              score: counts.posture > 0 ? (aggregateScores.posture / counts.posture) * 40 : 0 
+              score: counts.posture > 0 ? (aggregateScores.posture / counts.posture) * 10 : 0 
             },
             { 
               category: "Communication", 
-              score: counts.communication > 0 ? (aggregateScores.communication / counts.communication) * 40 : 0 
+              score: counts.communication > 0 ? (aggregateScores.communication / counts.communication) * 10 : 0 
             },
             { 
               category: "Knowledge", 
-              score: counts.knowledge > 0 ? (aggregateScores.knowledge / counts.knowledge) * 40 : 0 
+              score: counts.knowledge > 0 ? (aggregateScores.knowledge / counts.knowledge) * 10 : 0 
             },
             { 
               category: "Facial Expression", 
-              score: counts.fexpressions > 0 ? (aggregateScores.fexpressions / counts.fexpressions) * 40 : 0 
+              score: counts.fexpressions > 0 ? (aggregateScores.fexpressions / counts.fexpressions) * 10 : 0 
             },
             { 
               category: "Confidence", 
-              score: counts.confidence > 0 ? (aggregateScores.confidence / counts.confidence) * 40 : 0 
+              score: counts.confidence > 0 ? (aggregateScores.confidence / counts.confidence) * 10 : 0 
             },
             { 
               category: "Professional Demeanor", 
-              score: counts.profDemeanor > 0 ? (aggregateScores.profDemeanor / counts.profDemeanor) * 40 : 0 
+              score: counts.profDemeanor > 0 ? (aggregateScores.profDemeanor / counts.profDemeanor) * 10 : 0 
             },
           ];
 
@@ -190,6 +190,7 @@ export function RadarChartComponent() {
                 tick={{ fontSize: 12 }}
               />
               <PolarGrid />
+              <PolarRadiusAxis domain={[0, 100]} tickCount={6} axisLine={false} tick={false}/>
               <Radar
                 dataKey="score"
                 fill="#22C55E"

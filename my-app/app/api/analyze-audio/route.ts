@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       `1. Content analysis (relevance, completeness)\n` +
       `2. Communication style (clarity, tone, pace,vocabulary)\n` +
       `3. Professional demeanor (confidence, language use)\n` +
-      `4. Areas for improvement\n` +
+      `4. Areas for improvement in paragraph\n` +
       `5. Overall rating (1-10)\n` +
       `Return only JSON: {
         "contentAnalysis": "string",
