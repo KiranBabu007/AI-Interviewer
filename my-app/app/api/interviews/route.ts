@@ -13,6 +13,63 @@ interface QuestionAnswer {
   answer: string;
 }
 
+interface TopicsByLevel {
+  junior: string[];
+  mid: string[];
+  senior: string[];
+}
+
+interface TechnicalTopics {
+  [key: string]: TopicsByLevel;
+}
+
+const technicalTopics: TechnicalTopics = {
+  "full stack developer": {
+    junior: ["RESTful APIs", "Basic Frontend Frameworks", "Database Fundamentals", "Version Control", "Web Security Basics"],
+    mid: ["System Design Patterns", "Advanced Frontend", "Database Optimization", "Cloud Services", "Testing Strategies"],
+    senior: ["Distributed Systems", "Architecture Patterns", "Team Leadership", "Performance Optimization", "Technical Strategy"]
+  },
+  "frontend developer": {
+    junior: ["HTML/CSS Fundamentals", "JavaScript Basics", "UI/UX Principles", "Basic React/Angular", "Browser DevTools"],
+    mid: ["State Management", "Performance Optimization", "Responsive Design", "Testing Libraries", "Build Tools"],
+    senior: ["Frontend Architecture", "Micro-frontends", "Team Leadership", "Advanced Performance", "Design Systems"]
+  },
+  "backend developer": {
+    junior: ["API Design", "Database Basics", "Server Fundamentals", "Basic Security", "Version Control"],
+    mid: ["Microservices", "Caching Strategies", "Message Queues", "API Security", "Database Design"],
+    senior: ["System Architecture", "Scalability", "Cloud Infrastructure", "Team Leadership", "Performance Tuning"]
+  },
+  "python developer": {
+    junior: ["Python Basics", "Data Structures", "Basic Algorithms", "Package Management", "Testing Basics"],
+    mid: ["Advanced Python", "Web Frameworks", "Database Integration", "API Development", "Testing Strategies"],
+    senior: ["System Architecture", "Performance Optimization", "ML Integration", "Team Leadership", "Best Practices"]
+  }
+};
+
+const hrTopics: TopicsByLevel = {
+  junior: [
+    "Team Collaboration",
+    "Communication Skills",
+    "Problem-solving Approach",
+    "Time Management",
+    "Adaptability"
+  ],
+  mid: [
+    "Leadership Potential",
+    "Project Management",
+    "Conflict Resolution",
+    "Decision Making",
+    "Mentoring Abilities"
+  ],
+  senior: [
+    "Strategic Thinking",
+    "Change Management",
+    "Team Building",
+    "Crisis Management",
+    "Executive Presence"
+  ]
+};
+
 // Helper function to sanitize and parse JSON response
 const sanitizeAndParseJSON = (response: string): QuestionAnswer[] => {
   try {
@@ -37,8 +94,17 @@ const sanitizeAndParseJSON = (response: string): QuestionAnswer[] => {
   }
 };
 
-
-
+const getRandomTopic = (role: string, experience: string, randomNumber: number, interviewType: string): string => {
+  if (interviewType === "technical") {
+    const roleTopics = technicalTopics[role.toLowerCase()]?.[experience];
+    if (!roleTopics) throw new Error("Invalid role or experience level");
+    return roleTopics[randomNumber % roleTopics.length];
+  } else {
+    const hrLevelTopics = hrTopics[experience];
+    if (!hrLevelTopics) throw new Error("Invalid experience level");
+    return hrLevelTopics[randomNumber % hrLevelTopics.length];
+  }
+};
 
 const promptTemplate = `
 System: For the following context: {systemContent}
@@ -72,7 +138,7 @@ export async function POST(request: Request) {
     let cleanedResponse;
     let jsonResponse: QuestionAnswer[] = [];    // Generate a random number between 1 and 100 to induce randomness.
     const randomNumber = Math.floor(Math.random() * 100) + 1;
-    const timestampSeed = Date.now();
+   
 
     if (interviewType === 'resume' && resumeFile) {
         // Convert the uploaded file to ArrayBuffer and then to base64
@@ -96,10 +162,9 @@ export async function POST(request: Request) {
         cleanedResponse = result.response.text().replace(/```json\n?|\n?```/g, '');
         console.log(cleanedResponse)
     } else {
-      // Append the random number to induce a different question each time.
       const systemContent = interviewType === "technical" 
-  ? `Role: ${role}, Experience Level: ${experience}. Use seed ${randomNumber}-${timestampSeed} to randomly select 1 technical interview question from the question bank. Note:Don't ask coding questions.`
-  : `Experience Level: ${experience}. Use seed ${randomNumber}-${timestampSeed} to randomly select 1 HR interview question from the question bank.`;
+        ? `Role: ${role}, Experience Level: ${experience}. Generate a technical interview question about: ${getRandomTopic(role, experience, randomNumber, "technical")}. The question should assess understanding and experience, not coding skills.`
+        : `Experience Level: ${experience}. Generate an HR interview question about: ${getRandomTopic("", experience, randomNumber, "hr")}. Focus on behavioral and situational scenarios.`;
 
       const inputPrompt = promptTemplate
         .replace("{systemContent}", systemContent)
