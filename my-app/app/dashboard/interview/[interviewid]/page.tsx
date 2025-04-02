@@ -204,7 +204,7 @@ const Page = () => {
                 setIsProcessing={setIsProcessing}
               />
               <div className='mt-auto flex justify-end gap-6'>
-                {questions && activeQuestionIndex !== 1 && (
+                {questions && activeQuestionIndex !== 2 && (
                   <Button 
                     onClick={() => setActiveQuestionIndex(activeQuestionIndex + 1)}
                     disabled={isProcessing}
@@ -212,7 +212,7 @@ const Page = () => {
                     Next Question
                   </Button>
                 )}
-                {questions && activeQuestionIndex === 1 && (
+                {questions && activeQuestionIndex === 2 && (
                   <Button 
                     onClick={handleEndInterview}
                     disabled={isProcessing || isAnalyzing}

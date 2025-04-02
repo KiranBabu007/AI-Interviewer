@@ -156,7 +156,7 @@ export async function POST(request: Request) {
         // Send both the PDF data and the instruction prompt
         const result = await chatSession.sendMessage([
             resumePrompt,
-            'Based on this resume, generate 2 relevant interview questions and their sample answers that assess the candidate\'s experience and skills. Format the response as a JSON array: [{"question":"...","answer":"..."},{"question":"...","answer":"..."}] Note:Dont ask coding questions.'
+            'Based on this resume, generate 3 relevant interview questions and their sample answers that assess the candidate\'s experience and skills. Format the response as a JSON array: [{"question":"...","answer":"..."},{"question":"...","answer":"..."}] Note:Dont ask coding questions.'
         ]);
         
         cleanedResponse = result.response.text().replace(/```json\n?|\n?```/g, '');
